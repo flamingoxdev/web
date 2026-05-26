@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+python-multipart
+pdfplumber
+python-jobspy
+httpx
+numpy
+faiss-cpu
+supabase
+python-jose[cryptography]
+python-dotenv
+playwright
