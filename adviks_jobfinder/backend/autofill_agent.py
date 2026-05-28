@@ -4,7 +4,7 @@ Hybrid browser autofill agent.
 Strategy on each page:
   1. Snapshot every interactive element (label, name, placeholder, aria, etc.)
   2. DETERMINISTIC FILL — match each field to a value in the user's profile
-     using a label-based rules engine. This handles 80–95% of real apps without
+     using a label-based rules engine. This handles 80-95% of real apps without
      ever calling an LLM (fast, no hallucination, no API cost).
   3. Upload the resume PDF to any file input that looks like a resume.
   4. For fields the rules engine cannot match, ask the LLM (NVIDIA cloud by
