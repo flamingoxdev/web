@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { createClient } from "../lib/supabase";
+import { API_URL } from "../lib/api";
 
 interface ResumeUploadProps {
   onUploadComplete: (data: {
@@ -69,13 +70,16 @@ export default function ResumeUpload({
           ? { Authorization: `Bearer ${session.access_token}` }
           : {};
 
-        const res = await fetch("http://localhost:8000/upload", {
+        const res = await fetch(`${API_URL}/upload`, {
           method: "POST",
           headers,
           body: formData,
         });
 
-        if (!res.ok) throw new Error("Upload failed");
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.detail || `Upload failed (HTTP ${res.status})`);
+        }
 
         const data = await res.json();
         clearInterval(progressInterval);
@@ -85,11 +89,15 @@ export default function ResumeUpload({
           setIsUploading(false);
           onUploadComplete(data);
         }, 400);
-      } catch {
+      } catch (e) {
         clearInterval(progressInterval);
         setIsUploading(false);
         setUploadProgress(0);
-        setError("Upload failed — is the backend running on :8000?");
+        setError(
+          e instanceof Error
+            ? e.message
+            : "Upload failed — restart the backend (Ctrl+C, then uvicorn again)"
+        );
       }
     },
     [onUploadComplete, supabase.auth]

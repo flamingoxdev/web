@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { createClient } from "../../lib/supabase";
 import Header from "../../components/Header";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+import { API_URL } from "../../lib/api";
 
 interface ChatMessage {
   role: "user" | "assistant" | "system";
@@ -233,8 +233,8 @@ export default function ApplyPage() {
     <div className="relative min-h-screen">
       {/* Animated background */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden>
-        <div className="bg-orb-1 absolute -top-32 left-[15%] h-[500px] w-[500px] rounded-full bg-[#0d1b3e]/60 blur-[120px]" />
-        <div className="bg-orb-2 absolute top-[40%] -right-20 h-[420px] w-[420px] rounded-full bg-[#1a0d2e]/50 blur-[100px]" />
+        <div className="bg-orb-1 absolute -top-32 left-[15%] h-[500px] w-[500px] rounded-full bg-[#fc5c7d]/20 blur-[120px]" />
+        <div className="bg-orb-2 absolute top-[40%] -right-20 h-[420px] w-[420px] rounded-full bg-[#f77062]/15 blur-[100px]" />
       </div>
 
       <Header />
@@ -315,7 +315,7 @@ export default function ApplyPage() {
               {/* Template info */}
               {template && (
                 <div className="glass-card p-4">
-                  <div className="flex items-center gap-2 text-xs text-muted">
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-accent-violet">
                       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                       <polyline points="14 2 14 8 20 8" />
@@ -326,6 +326,15 @@ export default function ApplyPage() {
                     <span className="mx-1">•</span>
                     Tone: <span className="text-foreground/70">{(template as Record<string, unknown>).tone as string}</span>
                   </div>
+                  {Boolean((editableTailored as Record<string, unknown>)?._grounding) && (
+                    <p className="mt-2 flex items-center gap-1.5 text-[11px] text-accent-emerald">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <path d="M9 12l2 2 4-4" />
+                        <circle cx="12" cy="12" r="10" />
+                      </svg>
+                      Grounded: nothing invented. All facts come from your profile and resume.
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -467,7 +476,7 @@ export default function ApplyPage() {
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleApprove}
-                  className="rounded-xl bg-gradient-to-r from-accent-emerald to-accent-cyan px-8 py-3 text-sm font-semibold text-background transition-opacity hover:opacity-90"
+                  className="rounded-xl bg-gradient-to-r from-accent-emerald to-accent-cyan px-8 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
                 >
                   ✓ Approve & Continue
                 </button>
@@ -595,7 +604,7 @@ export default function ApplyPage() {
                 />
                 <span className="text-xs leading-relaxed text-muted">
                   I consent to submit my tailored resume and personal information to this job posting.
-                  I understand that InternMatch AI will open a browser and attempt to auto-fill the application form.
+                  I understand that Flamingo.ai will open a browser and attempt to auto-fill the application form.
                   I will review the form before final submission.
                 </span>
               </label>
@@ -610,7 +619,7 @@ export default function ApplyPage() {
                 <button
                   onClick={handleSubmit}
                   disabled={!consent}
-                  className="flex-1 rounded-xl bg-gradient-to-r from-accent-cyan to-accent-violet px-6 py-3 text-sm font-semibold text-background transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="flex-1 rounded-xl bg-gradient-to-r from-accent-cyan to-accent-violet px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Submit Application
                 </button>
@@ -669,7 +678,7 @@ export default function ApplyPage() {
                 </button>
                 <button
                   onClick={() => router.push("/roadmap")}
-                  className="rounded-xl bg-gradient-to-r from-accent-cyan to-accent-violet px-6 py-2.5 text-sm font-semibold text-background transition-opacity hover:opacity-90"
+                  className="rounded-xl bg-gradient-to-r from-accent-cyan to-accent-violet px-6 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
                 >
                   View Roadmap
                 </button>
@@ -697,7 +706,7 @@ export default function ApplyPage() {
               </p>
               <button
                 onClick={() => { setStage("loading"); }}
-                className="mt-6 rounded-xl bg-gradient-to-r from-accent-cyan to-accent-violet px-8 py-3 text-sm font-semibold text-background transition-opacity hover:opacity-90"
+                className="mt-6 rounded-xl bg-gradient-to-r from-accent-cyan to-accent-violet px-8 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
               >
                 Try Again
               </button>

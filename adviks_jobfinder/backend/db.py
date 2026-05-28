@@ -6,13 +6,12 @@ Tables expected in Supabase:
 """
 
 import json, os
+from pathlib import Path
 from dotenv import load_dotenv
 from supabase import create_client, Client
 
-load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
-
-SUPABASE_URL = os.getenv("SUPABASE_URL", "")
-SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
+_ENV_PATH = Path(__file__).resolve().parent.parent / ".env"
+load_dotenv(_ENV_PATH, override=False)
 
 _client: Client | None = None
 
@@ -20,7 +19,19 @@ _client: Client | None = None
 def get_client() -> Client:
     global _client
     if _client is None:
-        _client = create_client(SUPABASE_URL, SUPABASE_KEY)
+        url = os.getenv("SUPABASE_URL", "")
+        key = os.getenv("SUPABASE_SERVICE_KEY", "")
+        if not url or not key:
+            # Re-read from .env in case it was created after the process started.
+            load_dotenv(_ENV_PATH, override=True)
+            url = os.getenv("SUPABASE_URL", "")
+            key = os.getenv("SUPABASE_SERVICE_KEY", "")
+        if not url or not key:
+            raise RuntimeError(
+                f"Supabase DB env not configured. Ensure {_ENV_PATH} has "
+                "SUPABASE_URL and SUPABASE_SERVICE_KEY, then restart uvicorn."
+            )
+        _client = create_client(url, key)
     return _client
 
 
@@ -34,9 +45,20 @@ def upsert_profile(user_id: str, data: dict) -> dict:
 
 
 def get_profile(user_id: str) -> dict | None:
-    res = get_client().table("profiles").select("*").eq("user_id", user_id).maybe_single().execute()
-    # supabase-py returns None (not a response object) when no row matches
-    return res.data if res is not None else None
+    try:
+        res = (
+            get_client()
+            .table("profiles")
+            .select("*")
+            .eq("user_id", user_id)
+            .maybe_single()
+            .execute()
+        )
+        if res is None:
+            return None
+        return res.data
+    except Exception:
+        return None
 
 
 # ── Resumes ─────────────────────────────────────────────────────────────────

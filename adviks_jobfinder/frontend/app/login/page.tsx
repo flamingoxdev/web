@@ -15,7 +15,7 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/`,
+          redirectTo: `${window.location.origin}/onboarding/profile`,
         },
       });
       if (error) throw error;
@@ -29,9 +29,9 @@ export default function LoginPage() {
     <div className="relative flex min-h-screen items-center justify-center">
       {/* Animated background */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden>
-        <div className="bg-orb-1 absolute -top-32 left-[15%] h-[500px] w-[500px] rounded-full bg-[#0d1b3e]/60 blur-[120px]" />
-        <div className="bg-orb-2 absolute top-[40%] -right-20 h-[420px] w-[420px] rounded-full bg-[#1a0d2e]/50 blur-[100px]" />
-        <div className="bg-orb-3 absolute -bottom-20 left-[35%] h-[380px] w-[380px] rounded-full bg-[#06101a]/80 blur-[90px]" />
+        <div className="bg-orb-1 absolute -top-32 left-[15%] h-[500px] w-[500px] rounded-full bg-[#fc5c7d]/20 blur-[120px]" />
+        <div className="bg-orb-2 absolute top-[40%] -right-20 h-[420px] w-[420px] rounded-full bg-[#f77062]/15 blur-[100px]" />
+        <div className="bg-orb-3 absolute -bottom-20 left-[35%] h-[380px] w-[380px] rounded-full bg-[#ffb3c1]/25 blur-[90px]" />
       </div>
 
       <div className="relative z-10 w-full max-w-md px-4">
@@ -42,7 +42,7 @@ export default function LoginPage() {
               <svg
                 width="28" height="28" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
-                strokeLinejoin="round" className="text-background"
+                strokeLinejoin="round" className="text-white"
               >
                 <path d="M12 2L2 7l10 5 10-5-10-5z" />
                 <path d="M2 17l10 5 10-5" />
@@ -50,14 +50,13 @@ export default function LoginPage() {
               </svg>
             </div>
             <h1 className="font-[family-name:var(--font-syne)] text-2xl font-bold tracking-tight text-foreground">
-              Welcome to Intern
+              Welcome to{" "}
               <span className="bg-gradient-to-r from-accent-cyan to-accent-violet bg-clip-text text-transparent">
-                Match
-              </span>{" "}
-              <span className="font-light text-muted">AI</span>
+                Flamingo.ai
+              </span>
             </h1>
             <p className="mt-2 text-sm text-muted">
-              Sign in to find your perfect internship match
+              Sign in to build your profile and apply to internships
             </p>
           </div>
 

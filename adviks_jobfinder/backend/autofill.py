@@ -59,11 +59,14 @@ async def auto_fill_application(
             agent_result = await run_agent(page, user_data, tailored_data, resume_pdf)
 
             # Derive a friendly list for the existing UI (chips on the apply page)
-            fields_filled = [
-                f"{h['action']}:{h['element_id']}"
-                for h in agent_result.get("history", [])
-                if h.get("action") in ("fill", "click", "upload_resume", "select")
-            ]
+            fields_filled = []
+            for h in agent_result.get("history", []):
+                if h.get("action") not in ("fill", "click", "upload_resume", "select"):
+                    continue
+                if h.get("ok") is False:
+                    continue
+                element_ref = h.get("element_id") or h.get("id") or "unknown"
+                fields_filled.append(f"{h.get('action')}:{element_ref}")
 
             result["status"] = "filled"
             result["agent"] = agent_result

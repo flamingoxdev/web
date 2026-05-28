@@ -1,5 +1,5 @@
 """
-FastAPI backend for InternMatch AI.
+FastAPI backend for Flamingo.ai.
 
 Provides endpoints for:
 - Resume upload & parsing
@@ -10,17 +10,28 @@ Provides endpoints for:
 - Playwright auto-fill submission
 """
 
+import sys
 import uuid
 import json
 import os
 import httpx
-from fastapi import FastAPI, UploadFile, File, Request, HTTPException, Depends
+from pathlib import Path
+from fastapi import FastAPI, UploadFile, File, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 import asyncio
 from dotenv import load_dotenv
 
-load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+
+# Windows: Playwright needs ProactorEventLoop for subprocess_exec. uvicorn's
+# default policy on Windows is sometimes Selector which raises NotImplementedError
+# inside async_playwright. Force Proactor early.
+if sys.platform == "win32":
+    try:
+        asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+    except Exception:
+        pass
 
 from db import (
     upsert_profile, get_profile,
@@ -30,7 +41,7 @@ from db import (
     save_polished_data, get_polished_data,
     save_application, get_applications,
 )
-from auth import get_current_user
+from auth import get_current_user, SUPABASE_URL, SUPABASE_ANON_KEY
 from parser import extract_text
 from skills import extract_skills
 from scraper import fetch_jobs
@@ -38,20 +49,40 @@ from matcher import rank_jobs
 from tailor import search_template, tailor_resume, refine_resume
 from autofill import auto_fill_application, test_connection
 from resume_personal import extract_personal_info, merge_into_profile
+from onboarding import is_profile_complete, missing_profile_fields
 
-app = FastAPI(title="InternMatch AI", version="2.0")
+app = FastAPI(title="Flamingo.ai", version="2.1")
 
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[FRONTEND_URL, "http://localhost:3000"],
+    allow_origins=[
+        FRONTEND_URL,
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434")
 status_store: dict[str, str] = {}
+
+
+@app.on_event("startup")
+def verify_env():
+    missing = []
+    if not SUPABASE_URL:
+        missing.append("SUPABASE_URL")
+    if not SUPABASE_SERVICE_KEY:
+        missing.append("SUPABASE_SERVICE_KEY")
+    if not SUPABASE_ANON_KEY:
+        missing.append("SUPABASE_ANON_KEY")
+    if missing:
+        print(f"WARNING: Missing env vars: {', '.join(missing)} — auth/DB will fail until .env is fixed and server restarted.")
 
 
 # ── Helper to extract user from request ─────────────────────────────────────
@@ -65,7 +96,28 @@ def require_auth(request: Request) -> str:
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "version": "2.0"}
+    return {
+        "status": "ok",
+        "version": "2.1",
+        "name": "Flamingo.ai",
+        "supabase_configured": bool(SUPABASE_URL and SUPABASE_SERVICE_KEY),
+        "auth_configured": bool(SUPABASE_URL and SUPABASE_ANON_KEY),
+    }
+
+
+@app.get("/onboarding/status")
+def onboarding_status(request: Request):
+    user_id = require_auth(request)
+    profile = get_profile(user_id)
+    resumes = get_user_resumes(user_id)
+    complete = is_profile_complete(profile)
+    return {
+        "profile_complete": complete,
+        "has_resume": len(resumes) > 0,
+        "ready": complete and len(resumes) > 0,
+        "missing_fields": missing_profile_fields(profile),
+        "resume_id": resumes[0]["id"] if resumes else None,
+    }
 
 
 # ── Profile endpoints ──────────────────────────────────────────────────────
@@ -73,7 +125,10 @@ def health():
 @app.get("/profile")
 def get_user_profile(request: Request):
     user_id = require_auth(request)
-    profile = get_profile(user_id)
+    try:
+        profile = get_profile(user_id)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Database error: {e}")
     if not profile:
         # Return empty profile structure
         return {
@@ -121,6 +176,7 @@ def update_profile(body: dict, request: Request):
             data[field] = body[field]
 
     profile = upsert_profile(user_id, data)
+    profile["profile_complete"] = is_profile_complete(profile)
     return {"profile": profile}
 
 
@@ -198,6 +254,7 @@ async def search_jobs(body: dict, request: Request):
     resume_id = body.get("resume_id")
     location = body.get("location", "Remote")
     limit = int(body.get("limit", 20))
+    job_type = body.get("job_type", "any")  # 'any' | 'intern' | 'fulltime'
 
     resume = get_resume(resume_id)
     if not resume:
@@ -210,13 +267,21 @@ async def search_jobs(body: dict, request: Request):
         yield json.dumps({"status": "scraping"}) + "\n"
         await asyncio.sleep(0.1)
 
-        jobs = fetch_jobs(skills, location, limit)
+        jobs, meta = fetch_jobs(skills, location, limit, job_type=job_type)
         if not jobs:
-            yield json.dumps({"status": "error", "message": "No jobs found"}) + "\n"
+            err_msg = (
+                f"No jobs found for query \"{meta.get('query', '')}\" in {location}. "
+                + ("Errors: " + " | ".join(meta.get("errors", [])) if meta.get("errors") else "")
+            ).strip()
+            yield json.dumps({
+                "status": "error",
+                "message": err_msg,
+                "meta": meta,
+            }) + "\n"
             return
 
         status_store[resume_id] = "embedding"
-        yield json.dumps({"status": "embedding", "count": len(jobs)}) + "\n"
+        yield json.dumps({"status": "embedding", "count": len(jobs), "query": meta.get("query")}) + "\n"
         await asyncio.sleep(0.1)
 
         status_store[resume_id] = "ranking"
@@ -451,6 +516,18 @@ async def autofill_job(body: dict, request: Request):
         if not personal_info.get(key) and profile.get(key):
             personal_info[key] = profile[key]
 
+    # Also expose education / skills / extended fields to the autofill matcher
+    # so it can answer "school", "degree", "graduation", etc.
+    for key in ("education", "work_experience", "projects", "skills"):
+        raw = profile.get(key)
+        if isinstance(raw, str):
+            try:
+                personal_info[key] = json.loads(raw)
+            except (json.JSONDecodeError, TypeError):
+                personal_info[key] = []
+        elif raw is not None:
+            personal_info[key] = raw
+
     tailored_data = body.get("tailored_data", {})
 
     # Pull the original resume PDF from Storage so we can attach it to file inputs.
@@ -462,17 +539,37 @@ async def autofill_job(body: dict, request: Request):
         except Exception as e:
             print(f"Resume PDF fetch failed: {e}")
 
-    # Test if URL is reachable first
-    connectivity = await test_connection(job_url)
+    # Test connectivity & launch Playwright on a worker thread with a fresh
+    # ProactorEventLoop. Doing this in the FastAPI request loop on Windows
+    # raises NotImplementedError because uvicorn's loop is Selector-based.
+    def _run_in_proactor(coro_factory):
+        if sys.platform == "win32":
+            asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+        loop = asyncio.new_event_loop()
+        try:
+            asyncio.set_event_loop(loop)
+            return loop.run_until_complete(coro_factory())
+        finally:
+            loop.close()
+
+    connectivity = await asyncio.to_thread(_run_in_proactor, lambda: test_connection(job_url))
     if not connectivity.get("reachable"):
         return {"status": "error", "message": f"Cannot reach {job_url}: {connectivity.get('error', 'unknown')}"}
 
-    # Launch auto-fill
-    result = await auto_fill_application(job_url, personal_info, tailored_data, resume_pdf=resume_pdf)
+    result = await asyncio.to_thread(
+        _run_in_proactor,
+        lambda: auto_fill_application(job_url, personal_info, tailored_data, resume_pdf=resume_pdf),
+    )
 
-    # Save application record
     if result["status"] == "filled":
-        save_application(user_id, 0, "submitted")
+        polished_id = body.get("polished_data_id")
+        try:
+            if isinstance(polished_id, int) and polished_id > 0:
+                save_application(user_id, polished_id, "submitted")
+            else:
+                print("Skipping applications insert: no valid polished_data_id provided.")
+        except Exception as e:
+            print(f"applications insert failed: {e}")
 
     return result
 

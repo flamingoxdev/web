@@ -35,36 +35,31 @@ export default function Header() {
       <div className="mx-auto flex max-w-7xl items-center justify-between">
         <div className="flex items-center gap-6">
           {/* Logo + title */}
-          <Link href="/" className="flex items-center gap-3">
+          <Link href="/dashboard" className="flex items-center gap-3">
             <div className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-accent-cyan to-accent-violet">
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-background"
-              >
-                <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                <path d="M2 17l10 5 10-5" />
-                <path d="M2 12l10 5 10-5" />
-              </svg>
+              <span className="text-lg">🦩</span>
             </div>
             <span className="font-[family-name:var(--font-syne)] text-xl font-bold tracking-tight">
-              Intern
+              Flamingo
               <span className="bg-gradient-to-r from-accent-cyan to-accent-violet bg-clip-text text-transparent">
-                Match
-              </span>{" "}
-              <span className="font-light text-muted">AI</span>
+                .ai
+              </span>
             </span>
           </Link>
 
           {/* Nav links */}
           {user && (
             <nav className="flex items-center gap-1">
+              <Link
+                href="/dashboard"
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors
+                  ${pathname === "/dashboard"
+                    ? "bg-accent-cyan/10 text-accent-cyan"
+                    : "text-muted hover:text-foreground hover:bg-surface-raised"
+                  }`}
+              >
+                Dashboard
+              </Link>
               <Link
                 href="/profile"
                 className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors

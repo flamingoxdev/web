@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import SkillPills from "./SkillPills";
+import { API_URL } from "../lib/api";
 
 export interface Job {
   title: string;
@@ -19,11 +20,12 @@ interface JobCardProps {
   job: Job;
   index: number;
   resumeId: string | null;
+  applyMode?: "manual" | "auto";
 }
 
 type ToastState = { type: "success" | "error"; message: string } | null;
 
-export default function JobCard({ job, index, resumeId }: JobCardProps) {
+export default function JobCard({ job, index, resumeId, applyMode = "auto" }: JobCardProps) {
   const router = useRouter();
   const [expanded, setExpanded] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -55,7 +57,7 @@ export default function JobCard({ job, index, resumeId }: JobCardProps) {
     if (!resumeId || isSaving || savedToRoadmap) return;
     setIsSaving(true);
     try {
-      const res = await fetch("http://localhost:8000/roadmap/generate", {
+      const res = await fetch(`${API_URL}/roadmap/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -159,9 +161,13 @@ export default function JobCard({ job, index, resumeId }: JobCardProps) {
             href={job.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-accent-cyan hover:text-accent-violet transition-colors"
+            className={`inline-flex items-center gap-1.5 text-xs font-medium transition-colors ${
+              applyMode === "manual"
+                ? "rounded-lg bg-gradient-to-r from-accent-cyan to-accent-violet px-3 py-1.5 text-white shadow-lg shadow-accent-cyan/10"
+                : "text-accent-cyan hover:text-accent-violet"
+            }`}
           >
-            View on Indeed
+            {applyMode === "manual" ? "Apply manually →" : "View job posting"}
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
               <polyline points="15 3 21 3 21 9" />
@@ -170,7 +176,7 @@ export default function JobCard({ job, index, resumeId }: JobCardProps) {
           </a>
 
           <div className="flex items-center gap-2">
-            {/* Auto Apply */}
+            {applyMode === "auto" && (
             <button
               onClick={() => {
                 if (!resumeId) return;
@@ -185,7 +191,7 @@ export default function JobCard({ job, index, resumeId }: JobCardProps) {
                 router.push(`/apply/${slug}`);
               }}
               disabled={!resumeId}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-accent-cyan to-accent-violet px-3 py-1.5 text-xs font-semibold text-background transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-accent-cyan/10"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-accent-cyan to-accent-violet px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-accent-cyan/10"
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path d="M12 2L2 7l10 5 10-5-10-5z" />
@@ -193,6 +199,7 @@ export default function JobCard({ job, index, resumeId }: JobCardProps) {
               </svg>
               Auto Apply
             </button>
+            )}
 
             {/* Save to Roadmap */}
             <button

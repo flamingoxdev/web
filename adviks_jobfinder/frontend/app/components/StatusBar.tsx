@@ -9,7 +9,7 @@ interface StatusBarProps {
 }
 
 const stages: { key: Stage; label: string }[] = [
-  { key: "scraping", label: "Scraping Indeed" },
+  { key: "scraping", label: "Searching jobs" },
   { key: "embedding", label: "Embedding" },
   { key: "ranking", label: "Ranking" },
   { key: "done", label: "Done" },

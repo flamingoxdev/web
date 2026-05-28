@@ -13,13 +13,21 @@ per request from the same session.
 import os
 import time
 import httpx
+from pathlib import Path
 from dotenv import load_dotenv
 from fastapi import Request, HTTPException
 
-load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
+_ENV_PATH = Path(__file__).resolve().parent.parent / ".env"
+load_dotenv(_ENV_PATH, override=False)
 
-SUPABASE_URL = os.getenv("SUPABASE_URL", "").rstrip("/")
-SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
+
+def _env(name: str) -> str:
+    """Always re-read from os.environ in case the file changed between requests."""
+    return os.getenv(name, "")
+
+
+SUPABASE_URL = _env("SUPABASE_URL").rstrip("/")
+SUPABASE_ANON_KEY = _env("SUPABASE_ANON_KEY")
 
 _TOKEN_CACHE: dict[str, tuple[str, float]] = {}
 _CACHE_TTL_SECONDS = 300  # 5 min — well under Supabase's 1h access-token lifetime
@@ -27,18 +35,31 @@ _CACHE_TTL_SECONDS = 300  # 5 min — well under Supabase's 1h access-token life
 
 def _verify_with_supabase(token: str) -> str:
     """Call Supabase /auth/v1/user with the access token. Returns user_id."""
-    if not SUPABASE_URL or not SUPABASE_ANON_KEY:
+    # Re-read env each call so a hot-reload after fixing .env recovers cleanly.
+    url = _env("SUPABASE_URL").rstrip("/") or SUPABASE_URL
+    anon = _env("SUPABASE_ANON_KEY") or SUPABASE_ANON_KEY
+    if not url or not anon:
+        # Try one more time after explicit reload from disk (handles startup race).
+        load_dotenv(_ENV_PATH, override=True)
+        url = os.getenv("SUPABASE_URL", "").rstrip("/")
+        anon = os.getenv("SUPABASE_ANON_KEY", "")
+
+    if not url or not anon:
         raise HTTPException(
             status_code=500,
-            detail="Supabase env not configured (SUPABASE_URL / SUPABASE_ANON_KEY)",
+            detail=(
+                "Supabase env not configured. Ensure "
+                f"{_ENV_PATH} exists with SUPABASE_URL and SUPABASE_ANON_KEY, "
+                "then restart uvicorn (Ctrl+C and run it again — --reload does not pick up .env)."
+            ),
         )
 
     try:
         resp = httpx.get(
-            f"{SUPABASE_URL}/auth/v1/user",
+            f"{url}/auth/v1/user",
             headers={
                 "Authorization": f"Bearer {token}",
-                "apikey": SUPABASE_ANON_KEY,
+                "apikey": anon,
             },
             timeout=5.0,
         )

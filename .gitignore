@@ -1,1 +1,66 @@
+# OS
 .DS_Store
+Thumbs.db
+Desktop.ini
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+!.env.local.example
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+.turbo/
+.vercel/
+
+# Playwright / browser profiles
+.internmatch-chrome/
+playwright-report/
+test-results/
+blob-report/
+
+# ML / embeddings cache
+embeddings/
+*.index
+*.faiss
+
+# SQLite (legacy)
+*.db
+*.sqlite3
+
+# Logs & debug
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# TypeScript
+*.tsbuildinfo
+
+# MCP tool clones (install via setup, not committed)
+adviks_jobfinder/tools/**/node_modules/

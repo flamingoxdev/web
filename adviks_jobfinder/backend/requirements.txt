@@ -10,3 +10,4 @@ supabase
 python-jose[cryptography]
 python-dotenv
 playwright
+openai>=1.40

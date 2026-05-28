@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Header from "../components/Header";
+import { API_URL } from "../lib/api";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -106,7 +107,7 @@ function RoadmapCard({
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
-      await fetch(`http://localhost:8000/roadmap/${item.id}`, { method: "DELETE" });
+      await fetch(`${API_URL}/roadmap/${item.id}`, { method: "DELETE" });
       onDelete(item.id);
     } catch {
       setIsDeleting(false);
@@ -134,7 +135,6 @@ function RoadmapCard({
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          {/* View on Indeed */}
           {item.job_url && (
             <a
               href={item.job_url}
@@ -142,7 +142,7 @@ function RoadmapCard({
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-raised px-3 py-1.5 text-xs text-muted hover:text-foreground transition-colors"
             >
-              Indeed
+              View job
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
                 <polyline points="15 3 21 3 21 9" />
@@ -312,7 +312,7 @@ export default function RoadmapPage() {
       setLoading(false);
       return;
     }
-    fetch(`http://localhost:8000/roadmap/${id}`)
+    fetch(`${API_URL}/roadmap/${id}`)
       .then((r) => {
         if (!r.ok) throw new Error("Failed to load roadmaps");
         return r.json();
@@ -330,9 +330,9 @@ export default function RoadmapPage() {
     <div className="relative min-h-screen">
       {/* Animated background */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden>
-        <div className="bg-orb-1 absolute -top-32 left-[15%] h-[500px] w-[500px] rounded-full bg-[#0d1b3e]/60 blur-[120px]" />
-        <div className="bg-orb-2 absolute top-[40%] -right-20 h-[420px] w-[420px] rounded-full bg-[#1a0d2e]/50 blur-[100px]" />
-        <div className="bg-orb-3 absolute -bottom-20 left-[35%] h-[380px] w-[380px] rounded-full bg-[#06101a]/80 blur-[90px]" />
+        <div className="bg-orb-1 absolute -top-32 left-[15%] h-[500px] w-[500px] rounded-full bg-[#fc5c7d]/20 blur-[120px]" />
+        <div className="bg-orb-2 absolute top-[40%] -right-20 h-[420px] w-[420px] rounded-full bg-[#f77062]/15 blur-[100px]" />
+        <div className="bg-orb-3 absolute -bottom-20 left-[35%] h-[380px] w-[380px] rounded-full bg-[#ffb3c1]/25 blur-[90px]" />
       </div>
 
       <Header />
@@ -363,7 +363,7 @@ export default function RoadmapPage() {
             </div>
             <Link
               href="/"
-              className="mt-2 rounded-lg bg-gradient-to-r from-accent-cyan to-accent-violet px-5 py-2.5 text-sm font-semibold text-background transition-opacity hover:opacity-90"
+              className="mt-2 rounded-lg bg-gradient-to-r from-accent-cyan to-accent-violet px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
             >
               Upload Resume
             </Link>
@@ -406,7 +406,7 @@ export default function RoadmapPage() {
             </div>
             <Link
               href="/"
-              className="mt-2 rounded-lg bg-gradient-to-r from-accent-cyan to-accent-violet px-5 py-2.5 text-sm font-semibold text-background transition-opacity hover:opacity-90"
+              className="mt-2 rounded-lg bg-gradient-to-r from-accent-cyan to-accent-violet px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
             >
               Find Internships
             </Link>
@@ -424,7 +424,7 @@ export default function RoadmapPage() {
 
         <footer className="mt-16 border-t border-border py-6 text-center">
           <p className="font-[family-name:var(--font-jetbrains-mono)] text-xs text-muted/50">
-            InternMatch AI — powered by local embeddings
+            Flamingo.ai
           </p>
         </footer>
       </main>
