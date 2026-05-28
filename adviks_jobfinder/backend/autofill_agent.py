@@ -240,11 +240,14 @@ def _is_yes_no_field(field: dict) -> str | None:
 
 
 def _is_button_continue(field: dict) -> bool:
-    if field.get("tag") not in ("button", "a") and field.get("role") not in ("button",):
+    tag = field.get("tag")
+    ftype = (field.get("type") or "").lower()
+    is_clickable_input = tag == "input" and ftype in ("button", "submit", "image")
+    if tag not in ("button", "a") and field.get("role") not in ("button",) and not is_clickable_input:
         return False
     text = " ".join(
         str(field.get(k, "")).strip().lower()
-        for k in ("text", "label", "aria", "name", "id")
+        for k in ("text", "label", "aria", "name", "id", "value")
     ).strip()
     # Strict allow-list of buttons we may click. NEVER submit/send/finish.
     GOOD = ("next", "continue", "save and continue", "save & continue", "save",
@@ -258,7 +261,10 @@ def _is_button_continue(field: dict) -> bool:
 
 
 def _is_submit_button(field: dict) -> bool:
-    text = (field.get("text") or field.get("label") or "").lower().strip()
+    text = " ".join(
+        str(field.get(k, "")).strip().lower()
+        for k in ("text", "label", "aria", "name", "id", "value")
+    ).strip()
     BAD = ("submit application", "submit & apply", "submit and apply",
            "send application", "send my application", "finish application",
            "submit my application", "submit your application")
@@ -482,7 +488,7 @@ async def run_agent(
         pdf_path = tmp.name
 
     last_url = ""
-    stable_count = 0  # how many steps in a row produced no actions
+    stable_count = 0  # how many steps in a row produced no useful actions
     click_attempts: dict[str, int] = {}
 
     try:
@@ -537,7 +543,7 @@ async def run_agent(
                 if not actions:
                     stable_count += 1
                     log.append(f"step {step}: nothing to do (stable={stable_count})")
-                    if stable_count >= 2:
+                    if stable_count >= 4:
                         break
                     await asyncio.sleep(0.8)
                     continue
@@ -566,7 +572,7 @@ async def run_agent(
             # bail out a step earlier.
             if executed_clicks == 0 and not any(h["ok"] for h in history if h["step"] == step):
                 stable_count += 1
-                if stable_count >= 2:
+                if stable_count >= 4:
                     break
     finally:
         if pdf_path:
