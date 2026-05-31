@@ -1,22 +1,33 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "../lib/supabase";
 import { API_URL } from "../lib/api";
+import { getAccessToken, handleAuthFailure } from "../lib/authToken";
 import { validateProfile } from "../lib/onboarding";
 import {
   emptyPersonal,
-  VISA_OPTIONS,
-  YES_NO,
   type PersonalInfo,
   type WorkExperience,
   type Project,
   type Education,
+  sortByRecency,
+  isBlankWork,
+  isBlankProject,
+  isBlankEducation,
 } from "../lib/profileTypes";
 
-const emptyWork: WorkExperience = { title: "", company: "", duration: "", description: "" };
-const emptyProject: Project = { name: "", description: "", technologies: "", url: "" };
-const emptyEdu: Education = { degree: "", school: "", year: "", gpa: "" };
+const emptyWork: WorkExperience = {
+  title: "", company: "", location: "", start_date: "", end_date: "", duration: "", description: "",
+};
+const emptyProject: Project = {
+  name: "", description: "", technologies: "", url: "", start_date: "", end_date: "",
+};
+const emptyEdu: Education = { degree: "", school: "", location: "", year: "", gpa: "", honors: "", distinction: "" };
+
+const addBtnClass =
+  "rounded-lg border border-border bg-surface-raised px-3 py-1 text-xs font-medium transition-all hover:border-accent-cyan hover:bg-accent-cyan/10 hover:text-accent-cyan hover:scale-105";
 
 type ToastState = { type: "success" | "error"; message: string } | null;
 
@@ -26,6 +37,7 @@ interface ProfileFormProps {
 }
 
 export default function ProfileForm({ mode, onComplete }: ProfileFormProps) {
+  const router = useRouter();
   const supabase = createClient();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -39,22 +51,35 @@ export default function ProfileForm({ mode, onComplete }: ProfileFormProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const getToken = useCallback(async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    return session?.access_token || "";
-  }, [supabase.auth]);
+    return getAccessToken(supabase);
+  }, [supabase]);
 
   useEffect(() => {
-    const load = async () => {
+    let active = true;
+
+    const load = async (token: string) => {
+      if (!token) {
+        if (active) {
+          setLoading(false);
+          await handleAuthFailure(supabase, router);
+        }
+        return;
+      }
+
       try {
-        const token = await getToken();
         const res = await fetch(`${API_URL}/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        if (res.status === 401) {
+          if (active) await handleAuthFailure(supabase, router);
+          return;
+        }
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));
           throw new Error(err.detail || `Failed to load profile (${res.status})`);
         }
         const data = await res.json();
+        if (!active) return;
         const p = data.profile;
         const pi = typeof p.personal_info === "object" ? p.personal_info : {};
         setPersonal((prev) => ({
@@ -72,17 +97,36 @@ export default function ProfileForm({ mode, onComplete }: ProfileFormProps) {
         if (Array.isArray(p.projects) && p.projects.length) setProjects(p.projects);
         if (Array.isArray(p.education) && p.education.length) setEducation(p.education);
       } catch (e) {
+        if (!active) return;
         console.error("Profile load error:", e);
         setToast({
           type: "error",
           message: e instanceof Error ? e.message : "Could not load profile — restart the backend",
         });
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
-    load();
-  }, [getToken]);
+
+    const init = async () => {
+      const token = await getToken();
+      await load(token);
+    };
+
+    init();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.access_token && active) {
+        setLoading(true);
+        await load(session.access_token);
+      }
+    });
+
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
+  }, [getToken, supabase, router]);
 
   useEffect(() => {
     if (!toast) return;
@@ -101,6 +145,10 @@ export default function ProfileForm({ mode, onComplete }: ProfileFormProps) {
     setSaving(true);
     try {
       const token = await getToken();
+      if (!token) {
+        await handleAuthFailure(supabase, router);
+        return;
+      }
       const res = await fetch(`${API_URL}/profile`, {
         method: "PUT",
         headers: {
@@ -116,16 +164,21 @@ export default function ProfileForm({ mode, onComplete }: ProfileFormProps) {
           linkedin: personal.linkedin,
           github: personal.github,
           skills,
-          work_experience: workExperience.filter((w) => w.title.trim() || w.company.trim()),
-          projects: projects.filter((p) => p.name.trim()),
-          education: education.filter((e) => e.degree.trim() || e.school.trim()),
+          work_experience: sortByRecency(workExperience.filter((w) => w.title.trim() || w.company.trim())),
+          projects: sortByRecency(projects.filter((p) => p.name.trim())),
+          education: sortByRecency(education.filter((e) => e.degree.trim() || e.school.trim()), ["year"]),
         }),
       });
+      if (res.status === 401) {
+        await handleAuthFailure(supabase, router);
+        return;
+      }
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.detail || "Save failed");
       }
-      setToast({ type: "success", message: mode === "onboarding" ? "Profile saved — next: upload resume" : "Profile saved" });
+      setToast({ type: "success", message: mode === "onboarding" ? "Profile saved — next: choose a template" : "Profile saved" });
+      window.scrollTo({ top: 0, behavior: "smooth" });
       onComplete?.();
     } catch (e) {
       setToast({ type: "error", message: e instanceof Error ? e.message : "Failed to save profile" });
@@ -194,7 +247,7 @@ export default function ProfileForm({ mode, onComplete }: ProfileFormProps) {
     <div className="space-y-6">
       {mode === "onboarding" && (
         <div className="rounded-xl border border-accent-cyan/20 bg-accent-cyan/5 px-4 py-3 text-sm text-foreground">
-          <strong>Step 2 of 4:</strong> Tell us about yourself. Job applications ask for address, visa status, work authorization, and more — we collect it once so auto-fill works everywhere.
+          <strong>Step 1:</strong> Build your profile in detail. I&apos;ll use this to generate a one-page resume for every job you apply to — picking the most relevant projects and tailoring bullets.
         </div>
       )}
 
@@ -219,18 +272,7 @@ export default function ProfileForm({ mode, onComplete }: ProfileFormProps) {
         </div>
       </section>
 
-      <section className="glass-card p-6">
-        <h2 className="mb-4 font-[family-name:var(--font-syne)] text-lg font-semibold">Work Authorization & Visa</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          {field("visa_status", "Visa / citizenship status", true, "", "select", VISA_OPTIONS)}
-          {field("work_authorization", "Legally authorized to work in the US?", true, "", "select", YES_NO.filter((x) => x !== "Prefer not to say"))}
-          {field("require_sponsorship", "Will you require sponsorship now or in the future?", true, "", "select", YES_NO.filter((x) => x !== "Prefer not to say"))}
-          {field("expected_graduation", "Expected graduation date", true, "May 2026")}
-          {field("start_date", "Earliest start date", true, "June 2026")}
-          {field("willing_to_relocate", "Willing to relocate?", false, "", "select", YES_NO)}
-          {field("salary_expectation", "Salary expectation (optional)", false, "$25/hr or $80,000/yr")}
-        </div>
-      </section>
+
 
       <section className="glass-card p-6">
         <h2 className="mb-4 font-[family-name:var(--font-syne)] text-lg font-semibold">Links & Portfolio</h2>
@@ -241,16 +283,7 @@ export default function ProfileForm({ mode, onComplete }: ProfileFormProps) {
         </div>
       </section>
 
-      <section className="glass-card p-6">
-        <h2 className="mb-2 font-[family-name:var(--font-syne)] text-lg font-semibold">Voluntary EEO (optional)</h2>
-        <p className="mb-4 text-xs text-muted">Many applications ask these — optional here but helps auto-fill.</p>
-        <div className="grid gap-4 sm:grid-cols-2">
-          {field("gender", "Gender", false, "", "select", [...YES_NO, "Non-binary", "Other"])}
-          {field("ethnicity", "Race / ethnicity", false, "", "select", ["Prefer not to say", "Hispanic or Latino", "White", "Black or African American", "Asian", "Native American", "Pacific Islander", "Two or more races"])}
-          {field("veteran_status", "Veteran status", false, "", "select", ["Prefer not to say", "Not a veteran", "Protected veteran", "Active duty"])}
-          {field("disability_status", "Disability status", false, "", "select", ["Prefer not to say", "No disability", "Yes, I have a disability"])}
-        </div>
-      </section>
+
 
       {/* Skills */}
       <section className="glass-card p-6">
@@ -282,17 +315,31 @@ export default function ProfileForm({ mode, onComplete }: ProfileFormProps) {
       <section className="glass-card p-6">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-[family-name:var(--font-syne)] text-lg font-semibold">Work Experience <span className="text-accent-coral text-sm">*</span></h2>
-          <button onClick={() => setWorkExperience((p) => [...p, { ...emptyWork }])} className="text-xs text-accent-emerald">+ Add</button>
+          <button
+            type="button"
+            onClick={() => {
+              const last = workExperience[workExperience.length - 1];
+              if (last && isBlankWork(last)) return;
+              setWorkExperience((p) => [...p, { ...emptyWork }]);
+            }}
+            className={addBtnClass}
+          >
+            + Add
+          </button>
         </div>
         {errors.work && <p className="mb-2 text-xs text-accent-coral">{errors.work}</p>}
         {workExperience.map((w, idx) => (
           <div key={idx} className="mb-4 rounded-lg border border-border bg-surface/40 p-4 space-y-3">
             <div className="grid gap-3 sm:grid-cols-2">
-              <input value={w.title} onChange={(e) => { const u = [...workExperience]; u[idx] = { ...u[idx], title: e.target.value }; setWorkExperience(u); }} placeholder="Job title" className="rounded-lg border border-border bg-surface px-3 py-2 text-sm" />
-              <input value={w.company} onChange={(e) => { const u = [...workExperience]; u[idx] = { ...u[idx], company: e.target.value }; setWorkExperience(u); }} placeholder="Company" className="rounded-lg border border-border bg-surface px-3 py-2 text-sm" />
+              <input value={w.title} onChange={(e) => { const u = [...workExperience]; u[idx] = { ...u[idx], title: e.target.value }; setWorkExperience(u); }} placeholder="Job title *" className="rounded-lg border border-border bg-surface px-3 py-2 text-sm" />
+              <input value={w.company} onChange={(e) => { const u = [...workExperience]; u[idx] = { ...u[idx], company: e.target.value }; setWorkExperience(u); }} placeholder="Company *" className="rounded-lg border border-border bg-surface px-3 py-2 text-sm" />
             </div>
-            <input value={w.duration} onChange={(e) => { const u = [...workExperience]; u[idx] = { ...u[idx], duration: e.target.value }; setWorkExperience(u); }} placeholder="Duration" className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm" />
-            <textarea value={w.description} onChange={(e) => { const u = [...workExperience]; u[idx] = { ...u[idx], description: e.target.value }; setWorkExperience(u); }} placeholder="What you did" rows={2} className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm resize-none" />
+            <div className="grid gap-3 sm:grid-cols-3">
+              <input value={w.location} onChange={(e) => { const u = [...workExperience]; u[idx] = { ...u[idx], location: e.target.value }; setWorkExperience(u); }} placeholder="Location (e.g. San Francisco, CA)" className="rounded-lg border border-border bg-surface px-3 py-2 text-sm" />
+              <input value={w.start_date} onChange={(e) => { const u = [...workExperience]; u[idx] = { ...u[idx], start_date: e.target.value }; setWorkExperience(u); }} placeholder="Start date (e.g. Jun 2024)" className="rounded-lg border border-border bg-surface px-3 py-2 text-sm" />
+              <input value={w.end_date} onChange={(e) => { const u = [...workExperience]; u[idx] = { ...u[idx], end_date: e.target.value }; setWorkExperience(u); }} placeholder="End date or Present" className="rounded-lg border border-border bg-surface px-3 py-2 text-sm" />
+            </div>
+            <textarea value={w.description} onChange={(e) => { const u = [...workExperience]; u[idx] = { ...u[idx], description: e.target.value }; setWorkExperience(u); }} placeholder="What you did — one bullet per line (e.g. Built X using Y; Led team of 3…)" rows={4} className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm resize-none" />
           </div>
         ))}
       </section>
@@ -300,14 +347,31 @@ export default function ProfileForm({ mode, onComplete }: ProfileFormProps) {
       <section className="glass-card p-6">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-[family-name:var(--font-syne)] text-lg font-semibold">Projects <span className="text-accent-coral text-sm">*</span></h2>
-          <button onClick={() => setProjects((p) => [...p, { ...emptyProject }])} className="text-xs text-accent-amber">+ Add</button>
+          <button
+            type="button"
+            onClick={() => {
+              const last = projects[projects.length - 1];
+              if (last && isBlankProject(last)) return;
+              setProjects((p) => [...p, { ...emptyProject }]);
+            }}
+            className={addBtnClass}
+          >
+            + Add
+          </button>
         </div>
         {errors.projects && <p className="mb-2 text-xs text-accent-coral">{errors.projects}</p>}
         {projects.map((p, idx) => (
           <div key={idx} className="mb-4 rounded-lg border border-border bg-surface/40 p-4 space-y-3">
-            <input value={p.name} onChange={(e) => { const u = [...projects]; u[idx] = { ...u[idx], name: e.target.value }; setProjects(u); }} placeholder="Project name" className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm" />
-            <textarea value={p.description} onChange={(e) => { const u = [...projects]; u[idx] = { ...u[idx], description: e.target.value }; setProjects(u); }} placeholder="Description" rows={2} className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm resize-none" />
-            <input value={p.technologies} onChange={(e) => { const u = [...projects]; u[idx] = { ...u[idx], technologies: e.target.value }; setProjects(u); }} placeholder="Technologies" className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm" />
+            <input value={p.name} onChange={(e) => { const u = [...projects]; u[idx] = { ...u[idx], name: e.target.value }; setProjects(u); }} placeholder="Project name *" className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm" />
+            <textarea value={p.description} onChange={(e) => { const u = [...projects]; u[idx] = { ...u[idx], description: e.target.value }; setProjects(u); }} placeholder="What you built and the impact — be specific *" rows={3} className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm resize-none" />
+            <div className="grid gap-3 sm:grid-cols-2">
+              <input value={p.technologies} onChange={(e) => { const u = [...projects]; u[idx] = { ...u[idx], technologies: e.target.value }; setProjects(u); }} placeholder="Technologies (React, Python, AWS…)" className="rounded-lg border border-border bg-surface px-3 py-2 text-sm" />
+              <input value={p.url} onChange={(e) => { const u = [...projects]; u[idx] = { ...u[idx], url: e.target.value }; setProjects(u); }} placeholder="GitHub / demo URL (optional)" className="rounded-lg border border-border bg-surface px-3 py-2 text-sm" />
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <input value={p.start_date} onChange={(e) => { const u = [...projects]; u[idx] = { ...u[idx], start_date: e.target.value }; setProjects(u); }} placeholder="Start date (optional)" className="rounded-lg border border-border bg-surface px-3 py-2 text-sm" />
+              <input value={p.end_date} onChange={(e) => { const u = [...projects]; u[idx] = { ...u[idx], end_date: e.target.value }; setProjects(u); }} placeholder="End date (optional)" className="rounded-lg border border-border bg-surface px-3 py-2 text-sm" />
+            </div>
           </div>
         ))}
       </section>
@@ -315,14 +379,27 @@ export default function ProfileForm({ mode, onComplete }: ProfileFormProps) {
       <section className="glass-card p-6">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-[family-name:var(--font-syne)] text-lg font-semibold">Education</h2>
-          <button onClick={() => setEducation((p) => [...p, { ...emptyEdu }])} className="text-xs text-accent-cyan">+ Add</button>
+          <button
+            type="button"
+            onClick={() => {
+              const last = education[education.length - 1];
+              if (last && isBlankEducation(last)) return;
+              setEducation((p) => [...p, { ...emptyEdu }]);
+            }}
+            className={addBtnClass}
+          >
+            + Add
+          </button>
         </div>
         {education.map((e, idx) => (
           <div key={idx} className="mb-4 rounded-lg border border-border bg-surface/40 p-4 grid gap-3 sm:grid-cols-2">
-            <input value={e.degree} onChange={(ev) => { const u = [...education]; u[idx] = { ...u[idx], degree: ev.target.value }; setEducation(u); }} placeholder="Degree" className="rounded-lg border border-border bg-surface px-3 py-2 text-sm" />
+            <input value={e.degree} onChange={(ev) => { const u = [...education]; u[idx] = { ...u[idx], degree: ev.target.value }; setEducation(u); }} placeholder="Degree (e.g. B.S. Computer Science)" className="rounded-lg border border-border bg-surface px-3 py-2 text-sm" />
             <input value={e.school} onChange={(ev) => { const u = [...education]; u[idx] = { ...u[idx], school: ev.target.value }; setEducation(u); }} placeholder="School" className="rounded-lg border border-border bg-surface px-3 py-2 text-sm" />
-            <input value={e.year} onChange={(ev) => { const u = [...education]; u[idx] = { ...u[idx], year: ev.target.value }; setEducation(u); }} placeholder="Year" className="rounded-lg border border-border bg-surface px-3 py-2 text-sm" />
-            <input value={e.gpa} onChange={(ev) => { const u = [...education]; u[idx] = { ...u[idx], gpa: ev.target.value }; setEducation(u); }} placeholder="GPA" className="rounded-lg border border-border bg-surface px-3 py-2 text-sm" />
+            <input value={e.location} onChange={(ev) => { const u = [...education]; u[idx] = { ...u[idx], location: ev.target.value }; setEducation(u); }} placeholder="Location" className="rounded-lg border border-border bg-surface px-3 py-2 text-sm" />
+            <input value={e.year} onChange={(ev) => { const u = [...education]; u[idx] = { ...u[idx], year: ev.target.value }; setEducation(u); }} placeholder="Graduation year" className="rounded-lg border border-border bg-surface px-3 py-2 text-sm" />
+            <input value={e.gpa} onChange={(ev) => { const u = [...education]; u[idx] = { ...u[idx], gpa: ev.target.value }; setEducation(u); }} placeholder="GPA (optional)" className="rounded-lg border border-border bg-surface px-3 py-2 text-sm" />
+            <input value={e.honors} onChange={(ev) => { const u = [...education]; u[idx] = { ...u[idx], honors: ev.target.value }; setEducation(u); }} placeholder="Honors (e.g. Dean's List)" className="rounded-lg border border-border bg-surface px-3 py-2 text-sm" />
+            <input value={e.distinction} onChange={(ev) => { const u = [...education]; u[idx] = { ...u[idx], distinction: ev.target.value }; setEducation(u); }} placeholder="Distinction (e.g. Summa Cum Laude)" className="rounded-lg border border-border bg-surface px-3 py-2 text-sm sm:col-span-2" />
           </div>
         ))}
       </section>
@@ -333,7 +410,7 @@ export default function ProfileForm({ mode, onComplete }: ProfileFormProps) {
           disabled={saving}
           className="rounded-xl bg-gradient-to-r from-accent-cyan to-accent-violet px-8 py-3 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
         >
-          {saving ? "Saving..." : mode === "onboarding" ? "Save & Continue to Resume →" : "Save Profile"}
+          {saving ? "Saving..." : mode === "onboarding" ? "Save & Choose Template →" : "Save Profile"}
         </button>
       </div>
 

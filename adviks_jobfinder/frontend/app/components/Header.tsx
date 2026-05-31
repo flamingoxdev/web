@@ -47,7 +47,7 @@ export default function Header() {
             </span>
           </Link>
 
-          {/* Nav links */}
+          {/* Nav links — exactly 4 options as requested */}
           {user && (
             <nav className="flex items-center gap-1">
               <Link
@@ -75,20 +75,26 @@ export default function Header() {
                 Profile
               </Link>
               <Link
-                href="/roadmap"
+                href="/templates"
                 className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors
-                  ${pathname === "/roadmap"
-                    ? "bg-accent-violet/10 text-accent-violet"
+                  ${pathname === "/templates"
+                    ? "bg-accent-emerald/10 text-accent-emerald"
                     : "text-muted hover:text-foreground hover:bg-surface-raised"
                   }`}
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 3h7v7H3z" />
-                  <path d="M14 3h7v7h-7z" />
-                  <path d="M14 14h7v7h-7z" />
-                  <path d="M3 14h7v7H3z" />
-                </svg>
-                Roadmap
+                <span>📄</span>
+                Templates
+              </Link>
+              <Link
+                href="/copilot"
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors
+                  ${pathname === "/copilot"
+                    ? "bg-accent-amber/10 text-accent-amber"
+                    : "text-muted hover:text-foreground hover:bg-surface-raised"
+                  }`}
+              >
+                <span>🤖</span>
+                AI Assistant
               </Link>
             </nav>
           )}

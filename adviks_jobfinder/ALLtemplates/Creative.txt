@@ -1,0 +1,189 @@
+%-------------------------
+% Template 6: Creative / Designer Style
+% Colored blocks, bold personality, stands out visually
+%------------------------
+
+\documentclass[letterpaper,10pt]{article}
+
+\usepackage[top=0in, bottom=0in, left=0in, right=0in]{geometry}
+\usepackage{xcolor}
+\usepackage{fontawesome5}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{tabularx}
+\usepackage{tikz}
+\usepackage{paracol}
+\usepackage{setspace}
+\usepackage{graphicx}
+
+% Creative color palette
+\definecolor{coral}{HTML}{E17055}
+\definecolor{deepPurple}{HTML}{6C5CE7}
+\definecolor{mint}{HTML}{00CEC9}
+\definecolor{dark}{HTML}{2D3436}
+\definecolor{softWhite}{HTML}{F8F9FA}
+\definecolor{warmGray}{HTML}{636E72}
+\definecolor{leftBg}{HTML}{2D3436}
+
+\hypersetup{colorlinks=true, urlcolor=mint}
+\setlength{\parindent}{0pt}
+\pagestyle{empty}
+
+\newcommand{\creativeSecL}[2]{%
+  \vspace{6pt}
+  \noindent\colorbox{#1}{\color{white}\small\bfseries\hspace{4pt} #2 \hspace{4pt}}\\[3pt]
+}
+
+\newcommand{\creativeSecR}[1]{%
+  \vspace{6pt}
+  \noindent{\color{dark}\bfseries\large\scshape #1}\\[-4pt]
+  \noindent{\color{coral}\rule{\linewidth}{1.5pt}}\\[2pt]
+}
+
+\begin{document}
+
+\columnratio{0.32}
+\begin{paracol}{2}
+\backgroundcolor{c[0](0pt,0pt)(0.5\columnsep,0pt)}{leftBg}
+
+%---- LEFT PANEL ----%
+\begin{leftcolumn}
+\begin{minipage}[t][\textheight][t]{\linewidth}
+
+% Name block
+\vspace*{0pt}
+\noindent\colorbox{coral}{\makebox[\linewidth][l]{%
+  \hspace{6pt}\color{white}\Large\bfseries Jake\hspace{4pt}
+}}\\[-2pt]
+\noindent\colorbox{deepPurple}{\makebox[\linewidth][l]{%
+  \hspace{6pt}\color{white}\Large\bfseries Ryan\hspace{4pt}
+}}\\[-2pt]
+\noindent\colorbox{mint}{\makebox[\linewidth][l]{%
+  \hspace{6pt}\color{white}\scriptsize\bfseries SOFTWARE ENGINEER\hspace{4pt}
+}}
+
+\vspace{10pt}
+\hspace{6pt}
+\begin{minipage}{0.85\linewidth}
+
+\creativeSecL{coral}{CONTACT}
+{\color{softWhite}\scriptsize
+\faPhone\ 123-456-7890\\[3pt]
+\faEnvelope\ \href{mailto:jake@su.edu}{jake@su.edu}\\[3pt]
+\faLinkedin\ \href{https://linkedin.com/in/jake}{linkedin.com/in/jake}\\[3pt]
+\faGithub\ \href{https://github.com/jake}{github.com/jake}\\[3pt]
+\faMapMarker\ Georgetown, TX
+}
+
+\vspace{8pt}
+\creativeSecL{deepPurple}{SKILLS}
+{\color{softWhite}\scriptsize
+\textbf{Languages}\\
+Java \textbullet\ Python \textbullet\ C/C++\\
+JavaScript \textbullet\ SQL \textbullet\ R\\[4pt]
+\textbf{Frameworks}\\
+React \textbullet\ Node.js \textbullet\ Flask\\
+FastAPI \textbullet\ Material-UI\\[4pt]
+\textbf{Dev Tools}\\
+Git \textbullet\ Docker \textbullet\ TravisCI\\
+GCP \textbullet\ VS Code\\[4pt]
+\textbf{Libraries}\\
+pandas \textbullet\ NumPy \textbullet\ Matplotlib
+}
+
+\vspace{8pt}
+\creativeSecL{mint}{EDUCATION}
+{\color{softWhite}\scriptsize
+\textbf{B.A. Computer Science}\\
+Minor: Business\\
+Southwestern University\\
+{\color{warmGray}2018 -- 2021}\\[5pt]
+\textbf{A.A. Liberal Arts}\\
+Blinn College\\
+{\color{warmGray}2014 -- 2018}
+}
+
+\vspace{8pt}
+\creativeSecL{coral}{INTERESTS}
+{\color{softWhite}\scriptsize
+Open Source Development\\[2pt]
+Procedural Content Generation\\[2pt]
+Data Visualization\\[2pt]
+Distributed Systems
+}
+
+\end{minipage}
+\end{minipage}
+\end{leftcolumn}
+
+%---- RIGHT PANEL ----%
+\begin{rightcolumn}
+\hspace{8pt}
+\begin{minipage}[t]{0.92\linewidth}
+\vspace{8pt}
+
+\creativeSecR{Experience}
+
+{\bfseries\color{dark} Undergraduate Research Assistant} \hfill {\small\color{coral}\bfseries Texas A\&M}\\
+{\small\color{warmGray} June 2020 -- Present \hfill College Station, TX}
+\begin{itemize}[leftmargin=12pt, itemsep=0pt, topsep=2pt, label={\color{coral}$\blacktriangleright$}]
+  \scriptsize
+  \item REST API with FastAPI + PostgreSQL for LMS data ingestion
+  \item Full-stack GitHub analytics app (Flask + React + Docker)
+  \item Interactive visualizations for classroom collaboration
+\end{itemize}
+
+\vspace{4pt}
+
+{\bfseries\color{dark} IT Support Specialist} \hfill {\small\color{deepPurple}\bfseries Southwestern Univ.}\\
+{\small\color{warmGray} Sep. 2018 -- Present \hfill Georgetown, TX}
+\begin{itemize}[leftmargin=12pt, itemsep=0pt, topsep=2pt, label={\color{deepPurple}$\blacktriangleright$}]
+  \scriptsize
+  \item Managed campus computer fleet; maintained 200+ printers
+  \item Technical support for students, faculty, and staff
+\end{itemize}
+
+\vspace{4pt}
+
+{\bfseries\color{dark} AI Research Assistant} \hfill {\small\color{mint}\bfseries Southwestern Univ.}\\
+{\small\color{warmGray} May 2019 -- July 2019 \hfill Georgetown, TX}
+\begin{itemize}[leftmargin=12pt, itemsep=0pt, topsep=2pt, label={\color{mint}$\blacktriangleright$}]
+  \scriptsize
+  \item Procedural dungeon generation; 50K+ lines contributed
+  \item Research paper + WCCI conference presentation
+\end{itemize}
+
+\creativeSecR{Projects}
+
+\noindent\colorbox{coral!15}{\begin{minipage}{\linewidth}
+  \vspace{3pt}
+  \hspace{4pt}{\bfseries\color{dark} Gitlytics} \hfill {\scriptsize\color{coral} June 2020 -- Present}\\
+  \hspace{4pt}{\scriptsize\color{warmGray}\textit{Python, Flask, React, PostgreSQL, Docker}}
+  \begin{itemize}[leftmargin=16pt, itemsep=0pt, topsep=1pt, label={\color{coral}\textbullet}]
+    \scriptsize
+    \item Flask REST API + React SPA + GitHub OAuth integration
+    \item Async processing with Celery \& Redis
+  \end{itemize}
+  \vspace{3pt}
+\end{minipage}}
+
+\vspace{4pt}
+
+\noindent\colorbox{deepPurple!10}{\begin{minipage}{\linewidth}
+  \vspace{3pt}
+  \hspace{4pt}{\bfseries\color{dark} Simple Paintball} \hfill {\scriptsize\color{deepPurple} May 2018 -- May 2020}\\
+  \hspace{4pt}{\scriptsize\color{warmGray}\textit{Java, Spigot API, Maven, TravisCI}}
+  \begin{itemize}[leftmargin=16pt, itemsep=0pt, topsep=1pt, label={\color{deepPurple}\textbullet}]
+    \scriptsize
+    \item 2K+ downloads, 4.5/5 stars; CI/CD via TravisCI
+  \end{itemize}
+  \vspace{3pt}
+\end{minipage}}
+
+\end{minipage}
+\end{rightcolumn}
+
+\end{paracol}
+\end{document}

@@ -6,13 +6,14 @@ import { useRouter, usePathname } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { API_URL } from "../lib/api";
 import { fetchOnboardingStatus, type OnboardingStatus } from "../lib/onboarding";
+import { getAccessToken } from "../lib/authToken";
 
 interface OnboardingGuardProps {
   children: ReactNode;
 }
 
 const PUBLIC = ["/login"];
-const ONBOARDING = ["/onboarding/profile", "/onboarding/resume"];
+const ONBOARDING = ["/onboarding/profile"];
 
 export default function OnboardingGuard({ children }: OnboardingGuardProps) {
   const [user, setUser] = useState<User | null>(null);
@@ -39,35 +40,33 @@ export default function OnboardingGuard({ children }: OnboardingGuardProps) {
       }
 
       setUser(session.user);
-      const onboarding = await fetchOnboardingStatus(session.access_token, API_URL);
+      const token = await getAccessToken(supabase);
+      if (!token) {
+        router.replace("/login");
+        setLoading(false);
+        return;
+      }
+      const onboarding = await fetchOnboardingStatus(token, API_URL);
 
       if (!active) return;
       setStatus(onboarding);
 
-      if (pathname === "/login") {
+      if (pathname === "/login" || pathname === "/") {
         if (onboarding?.ready) router.replace("/dashboard");
-        else if (onboarding?.profile_complete) router.replace("/onboarding/resume");
+        else if (onboarding?.profile_complete) router.replace("/templates");
         else router.replace("/onboarding/profile");
         setLoading(false);
         return;
       }
 
-      if (pathname === "/") {
-        if (onboarding?.ready) router.replace("/dashboard");
-        else if (onboarding?.profile_complete) router.replace("/onboarding/resume");
-        else router.replace("/onboarding/profile");
-        setLoading(false);
-        return;
-      }
-
-      if (onboarding && !PUBLIC.includes(pathname) && !ONBOARDING.includes(pathname) && pathname !== "/profile") {
+      if (onboarding && !PUBLIC.includes(pathname) && !ONBOARDING.includes(pathname)) {
         if (!onboarding.profile_complete) {
           router.replace("/onboarding/profile");
           setLoading(false);
           return;
         }
-        if (!onboarding.has_resume) {
-          router.replace("/onboarding/resume");
+        if (!onboarding.has_template) {
+          router.replace("/templates");
           setLoading(false);
           return;
         }

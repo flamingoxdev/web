@@ -17,7 +17,7 @@ export default function OnboardingProfilePage() {
       <main className="relative mx-auto max-w-3xl px-4 py-10 sm:px-6">
         <h1 className="mb-2 font-[family-name:var(--font-syne)] text-3xl font-bold">Your Profile</h1>
         <p className="mb-8 text-sm text-muted">Required before you can search and apply to jobs.</p>
-        <ProfileForm mode="onboarding" onComplete={() => router.push("/onboarding/resume")} />
+        <ProfileForm mode="onboarding" onComplete={() => router.push("/templates")} />
       </main>
     </div>
   );

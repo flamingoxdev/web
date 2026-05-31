@@ -4,21 +4,18 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { createClient } from "../lib/supabase";
 import { API_URL } from "../lib/api";
 import Header from "../components/Header";
-import ResumeUpload from "../components/ResumeUpload";
 import SkillPills from "../components/SkillPills";
 import SearchBar, { type JobType } from "../components/SearchBar";
 import StatusBar from "../components/StatusBar";
 import JobCard, { Job } from "../components/JobCard";
 import SkillGapPanel from "../components/SkillGapPanel";
+import { fetchOnboardingStatus } from "../lib/onboarding";
 
 type Stage = "idle" | "uploading" | "scraping" | "embedding" | "ranking" | "done" | "error";
-type ApplyMode = "manual" | "auto";
 
 export default function DashboardPage() {
-  const [resumeId, setResumeId] = useState<string | null>(null);
   const [skills, setSkills] = useState<string[]>([]);
-  const [isUploaded, setIsUploaded] = useState(false);
-  const [applyMode, setApplyMode] = useState<ApplyMode>("auto");
+  const [profileReady, setProfileReady] = useState(false);
   const [stage, setStage] = useState<Stage>("idle");
   const [jobs, setJobs] = useState<Job[]>([]);
   const [jobCount, setJobCount] = useState(0);
@@ -28,42 +25,45 @@ export default function DashboardPage() {
   const supabase = createClient();
 
   useEffect(() => {
-    const fetchExistingResume = async () => {
+    const load = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
       try {
-        const res = await fetch(`${API_URL}/resumes`, {
+        const status = await fetchOnboardingStatus(session.access_token, API_URL);
+        setProfileReady(!!status?.ready);
+
+        const res = await fetch(`${API_URL}/profile`, {
           headers: { Authorization: `Bearer ${session.access_token}` },
         });
         if (res.ok) {
           const data = await res.json();
-          if (data.resumes?.length > 0) {
-            const latest = data.resumes[0];
-            setResumeId(latest.id);
-            const parsed = typeof latest.skills === "string" ? JSON.parse(latest.skills) : latest.skills;
-            setSkills(parsed || []);
-            setIsUploaded(true);
-          }
+          const p = data.profile;
+          const parsed = Array.isArray(p?.skills) ? p.skills : [];
+          setSkills(parsed);
         }
       } catch (e) {
-        console.error("Failed to fetch resumes", e);
+        console.error("Failed to load profile", e);
       }
     };
-    fetchExistingResume();
+    load();
   }, [supabase.auth]);
 
   const handleSearch = useCallback(async (location: string, jobType: JobType) => {
-    if (!resumeId) return;
+    if (!profileReady) return;
     setIsSearching(true);
     setJobs([]);
     setStage("scraping");
     setErrorMessage("");
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
       const res = await fetch(`${API_URL}/search`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ resume_id: resumeId, location, limit: 20, job_type: jobType }),
+        headers: {
+          "Content-Type": "application/json",
+          ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
+        body: JSON.stringify({ location, limit: 20, job_type: jobType }),
       });
       if (!res.ok) throw new Error("Search failed");
 
@@ -114,7 +114,7 @@ export default function DashboardPage() {
       setErrorMessage("Connection failed — is the backend running on :8000?");
       setIsSearching(false);
     }
-  }, [resumeId]);
+  }, [profileReady]);
 
   return (
     <div className="relative min-h-screen">
@@ -133,66 +133,27 @@ export default function DashboardPage() {
               Flamingo.ai
             </span>
           </h1>
-          <p className="mt-3 text-sm text-muted">Choose how you want to apply, then search jobs or internships.</p>
+          <p className="mt-3 text-sm text-muted">
+            Search jobs, then let AI tailor your profile — picking the best projects and rewriting bullets for each role.
+          </p>
         </section>
 
-        {/* Apply mode */}
-        <section className="mx-auto mb-8 max-w-xl glass-card p-5 animate-slide-up">
-          <h2 className="mb-3 font-[family-name:var(--font-syne)] text-sm font-semibold">Application mode</h2>
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              onClick={() => setApplyMode("manual")}
-              className={`rounded-xl border px-4 py-4 text-left transition-all ${
-                applyMode === "manual"
-                  ? "border-accent-cyan bg-accent-cyan/10"
-                  : "border-border hover:border-muted"
-              }`}
-            >
-              <p className="text-sm font-semibold text-foreground">Manual apply</p>
-              <p className="mt-1 text-xs text-muted">Open job links yourself; we tailor your resume.</p>
-            </button>
-            <button
-              onClick={() => setApplyMode("auto")}
-              className={`rounded-xl border px-4 py-4 text-left transition-all ${
-                applyMode === "auto"
-                  ? "border-accent-violet bg-accent-violet/10"
-                  : "border-border hover:border-muted"
-              }`}
-            >
-              <p className="text-sm font-semibold text-foreground">Auto apply</p>
-              <p className="mt-1 text-xs text-muted">AI fills forms in a browser using your profile.</p>
-            </button>
-          </div>
-        </section>
+        {!profileReady && (
+          <section className="mx-auto mb-6 max-w-xl rounded-xl border border-accent-amber/30 bg-accent-amber/5 px-4 py-3 text-sm text-center">
+            Complete your <a href="/profile" className="text-accent-cyan underline">profile</a> and pick a{" "}
+            <a href="/templates" className="text-accent-cyan underline">template</a> to start searching.
+          </section>
+        )}
 
-        {isUploaded && skills.length > 0 && (
+        {skills.length > 0 && (
           <section className="mx-auto mb-6 max-w-xl">
-            <p className="mb-2 text-xs font-medium text-muted">Your skills</p>
+            <p className="mb-2 text-xs font-medium text-muted">Skills from your profile</p>
             <SkillPills skills={skills} />
-            <p className="mt-2 text-xs text-muted">
-              <a href="/profile" className="text-accent-cyan underline">Edit profile</a>
-              {" · "}
-              Replace resume below
-            </p>
-            <div className="mt-4">
-              <ResumeUpload
-                isUploaded={true}
-                onUploadComplete={(d) => {
-                  setResumeId(d.resume_id);
-                  setSkills(d.extracted_skills);
-                }}
-                onReplace={() => {
-                  setResumeId(null);
-                  setJobs([]);
-                  setIsUploaded(false);
-                }}
-              />
-            </div>
           </section>
         )}
 
         <section className="mx-auto max-w-xl animate-slide-up">
-          <SearchBar onSearch={handleSearch} isSearching={isSearching} disabled={!isUploaded} />
+          <SearchBar onSearch={handleSearch} isSearching={isSearching} disabled={!profileReady} />
         </section>
 
         {stage !== "idle" && (
@@ -209,7 +170,7 @@ export default function DashboardPage() {
             <div className="flex flex-col gap-6 lg:flex-row">
               <div className="flex-1 space-y-4 lg:w-[65%]">
                 {jobs.map((job, i) => (
-                  <JobCard key={`${job.title}-${i}`} job={job} index={i} resumeId={resumeId} applyMode={applyMode} />
+                  <JobCard key={`${job.title}-${i}`} job={job} index={i} profileReady={profileReady} />
                 ))}
               </div>
               <div className="lg:w-[35%]">
@@ -221,9 +182,36 @@ export default function DashboardPage() {
           </section>
         )}
 
-        <footer className="mt-16 border-t border-border py-6 text-center">
-          <p className="font-[family-name:var(--font-jetbrains-mono)] text-xs text-muted/50">Flamingo.ai</p>
-        </footer>
+        <section className="mx-auto mt-16 max-w-3xl">
+          <div className="mb-4 text-center">
+            <h2 className="font-[family-name:var(--font-syne)] text-lg font-bold">Free Job & Internship Boards</h2>
+            <p className="mt-1 text-xs text-muted">
+              Community-maintained lists. Find a role, then come back and tailor your resume for it.
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {[
+              { label: "Summer 2027 Internships", repo: "vanshb03/Summer2027-Internships", url: "https://github.com/vanshb03/Summer2027-Internships" },
+              { label: "2026 SWE College Jobs", repo: "speedyapply/2026-SWE-College-Jobs", url: "https://github.com/speedyapply/2026-SWE-College-Jobs" },
+              { label: "Summer 2026 Internships", repo: "SimplifyJobs/Summer2026-Internships", url: "https://github.com/SimplifyJobs/Summer2026-Internships" },
+              { label: "2026 AI College Jobs", repo: "speedyapply/2026-AI-College-Jobs", url: "https://github.com/speedyapply/2026-AI-College-Jobs" },
+            ].map((b) => (
+              <a
+                key={b.url}
+                href={b.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="glass-card group flex items-center gap-3 p-4 transition-all hover:scale-[1.01] hover:shadow-lg"
+              >
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-raised text-lg">🔗</span>
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold group-hover:text-accent-cyan transition-colors">{b.label}</span>
+                  <span className="block truncate font-[family-name:var(--font-jetbrains-mono)] text-[10px] text-muted">{b.repo}</span>
+                </span>
+              </a>
+            ))}
+          </div>
+        </section>
       </main>
     </div>
   );

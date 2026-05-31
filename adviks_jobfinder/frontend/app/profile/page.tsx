@@ -11,8 +11,10 @@ export default function ProfilePage() {
       </div>
       <Header />
       <main className="relative mx-auto max-w-3xl px-4 py-10 sm:px-6">
-        <h1 className="mb-2 font-[family-name:var(--font-syne)] text-3xl font-bold">Edit Profile</h1>
-        <p className="mb-8 text-sm text-muted">Update anytime — used for tailoring and auto-filling applications.</p>
+        <h1 className="mb-2 font-[family-name:var(--font-syne)] text-3xl font-bold">Your Profile</h1>
+        <p className="mb-8 text-sm text-muted">
+          Everything here powers your resume. Add detailed experience and projects — the AI picks the most relevant ones per job and tailors bullets and summary.
+        </p>
         <ProfileForm mode="edit" />
       </main>
     </div>

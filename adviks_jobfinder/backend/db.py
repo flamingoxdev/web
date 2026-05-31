@@ -2,7 +2,8 @@
 Supabase database layer — replaces the old SQLite db.py.
 
 Tables expected in Supabase:
-  profiles, resumes, jobs, roadmaps, polished_data, applications
+  profiles, resumes, jobs, roadmaps, polished_data, applications,
+  build_sessions, application_packages
 """
 
 import json, os
@@ -202,3 +203,67 @@ def get_applications(user_id: str) -> list[dict]:
            .order("created_at", desc=True)
            .execute())
     return res.data or []
+
+
+# ── Build Sessions (resume wizard) — in-memory ──────────────────────────────
+# We keep these in RAM only; no Supabase table needed.
+_build_sessions: dict[str, dict] = {}
+
+
+def save_build_session(session_id: str, user_id: str, step: int, answers: dict) -> dict:
+    _build_sessions[session_id] = {
+        "id": session_id,
+        "user_id": user_id,
+        "step": step,
+        "answers": answers,
+    }
+    return _build_sessions[session_id]
+
+
+def get_build_session(session_id: str) -> dict | None:
+    return _build_sessions.get(session_id)
+
+
+def delete_build_session(session_id: str) -> None:
+    _build_sessions.pop(session_id, None)
+
+
+# ── Application Packages ────────────────────────────────────────────────────
+
+def save_application_package(
+    user_id: str,
+    resume_id: str,
+    job_title: str,
+    company: str,
+    job_url: str,
+    package: dict,
+) -> dict:
+    payload = {
+        "user_id": user_id,
+        "resume_id": resume_id,
+        "job_title": job_title,
+        "company": company,
+        "job_url": job_url,
+        "cover_letter": package.get("cover_letter", ""),
+        "professional_bio": package.get("professional_bio", ""),
+        "linkedin_summary": package.get("linkedin_summary", ""),
+        "recruiter_message": package.get("recruiter_message", ""),
+    }
+    res = get_client().table("application_packages").insert(payload).execute()
+    return res.data[0] if res.data else {}
+
+
+def get_application_packages(user_id: str) -> list[dict]:
+    res = (
+        get_client().table("application_packages")
+        .select("*")
+        .eq("user_id", user_id)
+        .order("created_at", desc=True)
+        .execute()
+    )
+    return res.data or []
+
+
+def get_application_package(package_id: int) -> dict | None:
+    res = get_client().table("application_packages").select("*").eq("id", package_id).maybe_single().execute()
+    return res.data if res is not None else None

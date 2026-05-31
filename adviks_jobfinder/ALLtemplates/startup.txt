@@ -1,0 +1,148 @@
+%-------------------------
+% Template 5: Modern Tech / Startup Bold
+% Bold headings, green accent, very readable for tech roles
+%------------------------
+
+\documentclass[letterpaper,10.5pt]{article}
+
+\usepackage[top=0.5in, bottom=0.5in, left=0.55in, right=0.55in]{geometry}
+\usepackage{xcolor}
+\usepackage{fontawesome5}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{tabularx}
+
+% Tech startup palette
+\definecolor{techGreen}{HTML}{00B894}
+\definecolor{darkCharcoal}{HTML}{2D3436}
+\definecolor{midSlate}{HTML}{636E72}
+\definecolor{lightSlate}{HTML}{B2BEC3}
+\definecolor{bgWhite}{HTML}{FFFFFF}
+\definecolor{tagBg}{HTML}{DFE6E9}
+
+\hypersetup{colorlinks=true, urlcolor=techGreen}
+\setlength{\parindent}{0pt}
+\pagestyle{empty}
+
+\newcommand{\techSection}[1]{%
+  \vspace{7pt}
+  \noindent{\color{darkCharcoal}\large\bfseries #1}%
+  \quad{\color{techGreen}\leaders\hrule height 0.6pt\hfill}\kern0pt\\[3pt]
+}
+
+\newcommand{\jobHead}[4]{%
+  \noindent{\bfseries\color{darkCharcoal}\large #1}%
+  \hfill{\color{techGreen}\small\bfseries #2}\\
+  {\color{midSlate}\small #3 \hfill #4}\\[1pt]
+}
+
+\newcommand{\techTag}[1]{%
+  \colorbox{tagBg}{\scriptsize\color{darkCharcoal}\texttt{#1}}%
+}
+
+\begin{document}
+
+% ---- HEADER ----
+\noindent\begin{minipage}[t]{0.60\linewidth}
+  {\color{darkCharcoal}\Huge\bfseries Jake Ryan}\\[3pt]
+  {\color{techGreen}\large\bfseries Software Engineer \& AI Researcher}\\[5pt]
+  {\small\color{midSlate} Building elegant systems at the intersection of data and design}
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.35\linewidth}
+  \raggedleft
+  \small\color{midSlate}
+  \faPhone\ 123-456-7890\\[2pt]
+  \faEnvelope\ \href{mailto:jake@su.edu}{jake@su.edu}\\[2pt]
+  \faLinkedin\ \href{https://linkedin.com/in/jake}{linkedin.com/in/jake}\\[2pt]
+  \faGithub\ \href{https://github.com/jake}{github.com/jake}
+\end{minipage}
+
+\vspace{6pt}
+\noindent{\color{techGreen}\rule{\linewidth}{2pt}}
+
+% ---- EXPERIENCE ----
+\techSection{Experience}
+
+\jobHead{Undergraduate Research Assistant}{June 2020 -- Present}{Texas A\&M University}{College Station, TX}
+\begin{itemize}[leftmargin=14pt, itemsep=0pt, topsep=1pt]
+  \small
+  \item[\color{techGreen}$\bullet$] Built production REST API with FastAPI + PostgreSQL for LMS data ingestion pipelines
+  \item[\color{techGreen}$\bullet$] Delivered full-stack GitHub analytics platform: Flask API, React UI, Docker containers
+  \item[\color{techGreen}$\bullet$] Created interactive collaboration dashboards for classroom GitHub activity
+\end{itemize}
+\vspace{1pt}
+\techTag{FastAPI} \techTag{PostgreSQL} \techTag{Flask} \techTag{React} \techTag{Docker}
+
+\vspace{6pt}
+
+\jobHead{IT Support Specialist}{Sep. 2018 -- Present}{Southwestern University}{Georgetown, TX}
+\begin{itemize}[leftmargin=14pt, itemsep=0pt, topsep=1pt]
+  \small
+  \item[\color{techGreen}$\bullet$] Configured and managed campus-wide computer fleet in coordination with administrators
+  \item[\color{techGreen}$\bullet$] Maintained 200+ printers and resolved technical issues for 1,000+ campus users
+\end{itemize}
+
+\vspace{6pt}
+
+\jobHead{AI Research Assistant}{May 2019 -- July 2019}{Southwestern University}{Georgetown, TX}
+\begin{itemize}[leftmargin=14pt, itemsep=0pt, topsep=1pt]
+  \small
+  \item[\color{techGreen}$\bullet$] Researched PCG dungeon generation; contributed 50K+ lines to active codebase via Git
+  \item[\color{techGreen}$\bullet$] Ran human-subject study; published 8-page paper; presented at WCCI globally
+\end{itemize}
+\vspace{1pt}
+\techTag{Java} \techTag{PCG} \techTag{Research} \techTag{Git}
+
+% ---- PROJECTS ----
+\techSection{Projects}
+
+\noindent\begin{tabularx}{\linewidth}{@{}X r@{}}
+  {\bfseries\color{darkCharcoal} Gitlytics} — \textit{\small\color{midSlate}Full-stack GitHub analytics platform} &
+  {\small\color{techGreen} June 2020 -- Present}
+\end{tabularx}
+\begin{itemize}[leftmargin=14pt, itemsep=0pt, topsep=1pt]
+  \small
+  \item[\color{techGreen}$\bullet$] Flask REST API + React SPA with GitHub OAuth; async tasks via Celery + Redis
+  \item[\color{techGreen}$\bullet$] Live collaboration graphs showing contributor patterns and code churn
+\end{itemize}
+\vspace{1pt}
+\techTag{Python} \techTag{Flask} \techTag{React} \techTag{PostgreSQL} \techTag{Docker} \techTag{Celery} \techTag{Redis}
+
+\vspace{5pt}
+
+\noindent\begin{tabularx}{\linewidth}{@{}X r@{}}
+  {\bfseries\color{darkCharcoal} Simple Paintball} — \textit{\small\color{midSlate}Open-source Minecraft server plugin} &
+  {\small\color{techGreen} May 2018 -- May 2020}
+\end{tabularx}
+\begin{itemize}[leftmargin=14pt, itemsep=0pt, topsep=1pt]
+  \small
+  \item[\color{techGreen}$\bullet$] Published plugin: 2K+ downloads, 4.5/5 stars; CI/CD pipeline via TravisCI
+\end{itemize}
+\vspace{1pt}
+\techTag{Java} \techTag{Spigot API} \techTag{Maven} \techTag{TravisCI}
+
+% ---- EDUCATION ----
+\techSection{Education}
+
+\noindent\begin{tabularx}{\linewidth}{@{}X r@{}}
+  {\bfseries\color{darkCharcoal}Southwestern University} — B.A. Computer Science (Minor: Business) & {\color{techGreen}\small 2018 -- 2021}
+\end{tabularx}
+\noindent\begin{tabularx}{\linewidth}{@{}X r@{}}
+  {\bfseries\color{darkCharcoal}Blinn College} — Associate's in Liberal Arts & {\color{techGreen}\small 2014 -- 2018}
+\end{tabularx}
+
+% ---- SKILLS ----
+\techSection{Technical Skills}
+
+\noindent\begin{tabularx}{\linewidth}{@{}p{0.14\linewidth} X@{}}
+  {\small\bfseries Languages}   & {\small Java, Python, C/C++, SQL (Postgres), JavaScript, HTML/CSS, R} \\[2pt]
+  {\small\bfseries Frameworks}  & {\small React, Node.js, Flask, FastAPI, JUnit, WordPress, Material-UI} \\[2pt]
+  {\small\bfseries Dev Tools}   & {\small Git, Docker, TravisCI, Google Cloud Platform, VS Code, PyCharm, IntelliJ} \\[2pt]
+  {\small\bfseries Libraries}   & {\small pandas, NumPy, Matplotlib} \\
+\end{tabularx}
+
+\end{document}

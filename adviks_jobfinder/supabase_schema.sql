@@ -104,3 +104,45 @@ CREATE INDEX IF NOT EXISTS idx_resumes_user ON resumes(user_id);
 CREATE INDEX IF NOT EXISTS idx_roadmaps_resume ON roadmaps(resume_id);
 CREATE INDEX IF NOT EXISTS idx_polished_user ON polished_data(user_id);
 CREATE INDEX IF NOT EXISTS idx_applications_user ON applications(user_id);
+
+-- ── Resume Build Sessions (AI wizard) ────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS build_sessions (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    step INTEGER DEFAULT 0,
+    answers JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE build_sessions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users manage own build sessions" ON build_sessions
+    FOR ALL USING (true);  -- service key bypasses RLS
+
+CREATE INDEX IF NOT EXISTS idx_build_sessions_user ON build_sessions(user_id);
+
+CREATE TRIGGER build_sessions_updated_at
+    BEFORE UPDATE ON build_sessions
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+-- ── Application Packages ─────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS application_packages (
+    id BIGSERIAL PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    resume_id TEXT REFERENCES resumes(id) ON DELETE SET NULL,
+    job_title TEXT,
+    company TEXT,
+    job_url TEXT,
+    cover_letter TEXT,
+    professional_bio TEXT,
+    linkedin_summary TEXT,
+    recruiter_message TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE application_packages ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users manage own packages" ON application_packages
+    FOR ALL USING (true);  -- service key bypasses RLS
+
+CREATE INDEX IF NOT EXISTS idx_packages_user ON application_packages(user_id);
+CREATE INDEX IF NOT EXISTS idx_packages_resume ON application_packages(resume_id);

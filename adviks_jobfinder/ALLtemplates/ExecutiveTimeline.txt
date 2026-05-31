@@ -1,0 +1,153 @@
+%-------------------------
+% Template 10: Timeline / Executive Premium
+% Left timeline bar with dots, premium look
+%------------------------
+
+\documentclass[letterpaper,10.5pt]{article}
+
+\usepackage[top=0.55in, bottom=0.55in, left=0.6in, right=0.7in]{geometry}
+\usepackage{xcolor}
+\usepackage{fontawesome5}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{tikz}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{multirow}
+
+% Premium palette
+\definecolor{premiumNavy}{HTML}{0D2137}
+\definecolor{premiumGold}{HTML}{B8962E}
+\definecolor{lightNavy}{HTML}{1A3A5C}
+\definecolor{textGray}{HTML}{4A4A4A}
+\definecolor{lightGray}{HTML}{9E9E9E}
+\definecolor{ruleLine}{HTML}{E0E0E0}
+\definecolor{dotColor}{HTML}{B8962E}
+\definecolor{timelineBar}{HTML}{0D2137}
+
+\hypersetup{colorlinks=true, urlcolor=premiumNavy}
+\setlength{\parindent}{0pt}
+\pagestyle{empty}
+
+% Timeline dot + section
+\newcommand{\tlSection}[1]{%
+  \vspace{4pt}
+  \noindent
+  \begin{tikzpicture}[remember picture]
+    \fill[premiumGold] (0,0) circle (4pt);
+    \draw[timelineBar, line width=0.8pt] (0,-0.12) -- (0,-0.3);
+  \end{tikzpicture}
+  \hspace{4pt}{\color{premiumNavy}\large\bfseries\scshape #1}\\[-4pt]
+  \noindent\hspace{16pt}{\color{ruleLine}\rule{0.90\linewidth}{0.5pt}}\\[2pt]
+}
+
+\newcommand{\tlEntry}[4]{%
+  \noindent\hspace{16pt}%
+  \begin{minipage}[t]{0.88\linewidth}
+    \noindent{\bfseries\color{premiumNavy} #1} \hfill {\color{premiumGold}\small\bfseries #2}\\
+    {\small\color{lightGray}\itshape #3 \hfill #4}\\[1pt]
+  \end{minipage}\\
+}
+
+\begin{document}
+
+%---- HEADER ----%
+\noindent\begin{minipage}[t]{0.62\linewidth}
+  \vspace{0pt}
+  {\color{premiumNavy}\fontsize{28}{30}\selectfont\bfseries Jake Ryan}\\[4pt]
+  {\color{premiumGold}\rule{4cm}{1.5pt}}\\[4pt]
+  {\color{textGray} Software Engineer \textbullet\ AI Researcher \textbullet\ Full-Stack Developer}
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.34\linewidth}
+  \raggedleft\small\color{lightGray}
+  \faPhone\ 123-456-7890\\[3pt]
+  \faEnvelope\ \href{mailto:jake@su.edu}{jake@su.edu}\\[3pt]
+  \faLinkedin\ \href{https://linkedin.com/in/jake}{linkedin.com/in/jake}\\[3pt]
+  \faGithub\ \href{https://github.com/jake}{github.com/jake}\\[3pt]
+  \faMapMarker\ Georgetown, TX
+\end{minipage}
+
+\vspace{8pt}
+\noindent{\color{premiumNavy}\rule{\linewidth}{1.5pt}}\\[-2pt]
+\noindent{\color{premiumGold}\rule{\linewidth}{2.5pt}}
+
+\vspace{6pt}
+
+%---- EDUCATION ----%
+\tlSection{Education}
+
+\tlEntry{Southwestern University}{Georgetown, TX}{Bachelor of Arts in Computer Science, Minor in Business}{Aug. 2018 -- May 2021}
+\vspace{3pt}
+\tlEntry{Blinn College}{Bryan, TX}{Associate's in Liberal Arts}{Aug. 2014 -- May 2018}
+
+%---- EXPERIENCE ----%
+\tlSection{Professional Experience}
+
+\tlEntry{Undergraduate Research Assistant}{June 2020 -- Present}{Texas A\&M University, Dept. of Computer Science}{College Station, TX}
+\begin{itemize}[leftmargin=32pt, itemsep=0pt, topsep=2pt, label={\color{premiumGold}\small$\diamond$}]
+  \small
+  \item Developed REST API (FastAPI, PostgreSQL) supporting data pipelines for learning management systems
+  \item Built full-stack GitHub analytics platform: Flask REST API, React UI, PostgreSQL, Docker containerization
+  \item Created interactive collaboration visualizations for classroom GitHub activity research
+\end{itemize}
+
+\vspace{5pt}
+
+\tlEntry{IT Support Specialist}{Sep. 2018 -- Present}{Southwestern University, Office of Technology}{Georgetown, TX}
+\begin{itemize}[leftmargin=32pt, itemsep=0pt, topsep=2pt, label={\color{premiumGold}\small$\diamond$}]
+  \small
+  \item Configured and managed campus-wide computer systems serving 1,000+ users
+  \item Maintained 200+ printers and classroom equipment; reduced downtime through preventive protocols
+\end{itemize}
+
+\vspace{5pt}
+
+\tlEntry{AI Research Assistant}{May 2019 -- July 2019}{Southwestern University}{Georgetown, TX}
+\begin{itemize}[leftmargin=32pt, itemsep=0pt, topsep=2pt, label={\color{premiumGold}\small$\diamond$}]
+  \small
+  \item Investigated procedural dungeon generation; contributed 50K+ lines of code via Git
+  \item Conducted human-subject study; authored 8-page research paper; presented at WCCI
+\end{itemize}
+
+%---- PROJECTS ----%
+\tlSection{Key Projects}
+
+\noindent\hspace{16pt}\begin{minipage}{0.88\linewidth}
+\noindent{\bfseries\color{premiumNavy} Gitlytics} \hfill {\color{premiumGold}\small June 2020 -- Present}\\
+{\small\color{lightGray}\itshape Python, Flask, React, PostgreSQL, Docker, Celery, Redis}
+\begin{itemize}[leftmargin=16pt, itemsep=0pt, topsep=2pt, label={\color{premiumGold}\small$\diamond$}]
+  \small
+  \item Flask REST API + React SPA; GitHub OAuth; async task queue via Celery + Redis
+  \item Real-time collaboration graphs revealing contributor patterns and code activity trends
+\end{itemize}
+
+\vspace{5pt}
+
+\noindent{\bfseries\color{premiumNavy} Simple Paintball} \hfill {\color{premiumGold}\small May 2018 -- May 2020}\\
+{\small\color{lightGray}\itshape Java, Spigot API, Maven, TravisCI, Git}
+\begin{itemize}[leftmargin=16pt, itemsep=0pt, topsep=2pt, label={\color{premiumGold}\small$\diamond$}]
+  \small
+  \item Open-source Minecraft plugin: 2K+ downloads, 4.5/5 community rating; CI/CD via TravisCI
+\end{itemize}
+\end{minipage}
+
+%---- SKILLS ----%
+\tlSection{Technical Skills}
+
+\noindent\hspace{16pt}\begin{minipage}{0.88\linewidth}
+\noindent\begin{tabularx}{\linewidth}{@{}p{0.13\linewidth} X}
+  {\small\bfseries\color{premiumNavy} Languages}   & {\small Java, Python, C/C++, SQL (PostgreSQL), JavaScript, HTML/CSS, R} \\[2pt]
+  {\small\bfseries\color{premiumNavy} Frameworks}  & {\small React, Node.js, Flask, FastAPI, JUnit, WordPress, Material-UI} \\[2pt]
+  {\small\bfseries\color{premiumNavy} Dev Tools}   & {\small Git, Docker, TravisCI, Google Cloud Platform, VS Code, PyCharm, IntelliJ} \\[2pt]
+  {\small\bfseries\color{premiumNavy} Libraries}   & {\small pandas, NumPy, Matplotlib} \\
+\end{tabularx}
+\end{minipage}
+
+\vspace{8pt}
+\noindent{\color{premiumGold}\rule{\linewidth}{2.5pt}}\\[-2pt]
+\noindent{\color{premiumNavy}\rule{\linewidth}{1.5pt}}
+
+\end{document}

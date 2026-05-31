@@ -101,6 +101,78 @@ def chat(prompt: str, *, system: str | None = None, json_mode: bool = True, time
     return _chat_ollama(prompt, system=system, json_mode=json_mode, timeout=timeout)
 
 
+def chat_messages(
+    messages: list[dict],
+    *,
+    json_mode: bool = False,
+    timeout: int = 90,
+    max_tokens: int | None = None,
+) -> str:
+    """Multi-turn chat. messages: [{role, content}, ...]. Uses NVIDIA or Ollama."""
+    if _provider() == "nvidia":
+        return _chat_messages_nvidia(messages, json_mode=json_mode, timeout=timeout, max_tokens=max_tokens)
+    return _chat_messages_ollama(messages, json_mode=json_mode, timeout=timeout, max_tokens=max_tokens)
+
+
+def _chat_messages_nvidia(
+    messages: list[dict],
+    *,
+    json_mode: bool,
+    timeout: int,
+    max_tokens: int | None,
+) -> str:
+    client = _get_nvidia_client()
+    model = os.getenv("NVIDIA_MODEL", NVIDIA_MODEL)
+    token_limit = max_tokens or int(
+        os.getenv("ASSISTANT_MAX_TOKENS" if not json_mode else "LLM_MAX_TOKENS", "1800" if not json_mode else "700")
+    )
+    temperature = float(os.getenv("LLM_TEMPERATURE", "0.2" if json_mode else "0.4"))
+    top_p = float(os.getenv("LLM_TOP_P", "0.7"))
+
+    msgs = list(messages)
+    if json_mode and msgs:
+        last = msgs[-1]
+        if last.get("role") == "user":
+            msgs[-1] = {
+                **last,
+                "content": (
+                    str(last.get("content", ""))
+                    + "\n\nIMPORTANT: respond with ONLY a valid JSON object. "
+                    "No markdown, no preamble, no trailing prose."
+                ),
+            }
+
+    resp = client.chat.completions.create(
+        model=model,
+        messages=msgs,  # type: ignore[arg-type]
+        temperature=temperature,
+        top_p=top_p,
+        max_tokens=token_limit,
+        stream=False,
+        timeout=timeout,
+    )
+    return (resp.choices[0].message.content or "").strip()
+
+
+def _chat_messages_ollama(
+    messages: list[dict],
+    *,
+    json_mode: bool,
+    timeout: int,
+    max_tokens: int | None,
+) -> str:
+    import httpx
+
+    payload: dict = {"model": OLLAMA_MODEL, "messages": messages, "stream": False}
+    if json_mode:
+        payload["format"] = "json"
+    if max_tokens:
+        payload["options"] = {"num_predict": max_tokens}
+    r = httpx.post(f"{OLLAMA_URL}/api/chat", json=payload, timeout=timeout)
+    r.raise_for_status()
+    return r.json()["message"]["content"].strip()
+
+
 def provider_info() -> dict:
     if _provider() == "nvidia":
         return {"provider": "nvidia", "model": os.getenv("NVIDIA_MODEL", NVIDIA_MODEL), "configured": bool(NVIDIA_API_KEY)}

@@ -3,10 +3,10 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-export default function OnboardingResumeRedirect() {
+export default function ResumeRedirectPage() {
   const router = useRouter();
   useEffect(() => {
-    router.replace("/onboarding/profile");
+    router.replace("/templates");
   }, [router]);
   return null;
 }

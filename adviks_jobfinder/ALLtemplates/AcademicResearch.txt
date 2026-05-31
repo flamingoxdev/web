@@ -1,0 +1,131 @@
+%-------------------------
+% Template 8: Academic / Research CV Style
+% Great for PhD applications, research roles, academia
+%------------------------
+
+\documentclass[letterpaper,11pt]{article}
+
+\usepackage[top=0.6in, bottom=0.6in, left=0.75in, right=0.75in]{geometry}
+\usepackage{xcolor}
+\usepackage{fontawesome5}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{tabularx}
+
+\definecolor{academicBlue}{HTML}{003F88}
+\definecolor{darkText}{HTML}{222222}
+\definecolor{grayText}{HTML}{555555}
+\definecolor{ruleColor}{HTML}{003F88}
+
+\hypersetup{colorlinks=true, urlcolor=academicBlue, citecolor=academicBlue}
+\setlength{\parindent}{0pt}
+\pagestyle{empty}
+
+\titleformat{\section}
+  {\color{academicBlue}\normalsize\bfseries\scshape}
+  {}{0em}{}
+  [{\color{ruleColor}\titlerule[0.5pt]}]
+
+\begin{document}
+
+% Academic header — left-aligned name, right-aligned contact
+\noindent\begin{minipage}[t]{0.55\linewidth}
+  {\huge\bfseries\color{darkText} Jake Ryan}\\[4pt]
+  {\color{grayText}\itshape Research Assistant in Computer Science}\\[2pt]
+  {\color{grayText}\itshape Interests: AI, Procedural Generation, HCI, Data Visualization}
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.40\linewidth}
+  \raggedleft\small\color{grayText}
+  \faPhone\ 123-456-7890\\[2pt]
+  \faEnvelope\ \href{mailto:jake@su.edu}{jake@su.edu}\\[2pt]
+  \faGlobe\ \href{https://github.com/jake}{github.com/jake}\\[2pt]
+  \faLinkedin\ \href{https://linkedin.com/in/jake}{linkedin.com/in/jake}\\[2pt]
+  Georgetown, Texas
+\end{minipage}
+
+\vspace{6pt}
+
+\section{Education}
+\vspace{4pt}
+
+\noindent{\bfseries Bachelor of Arts in Computer Science} \hfill {\color{grayText} May 2021}\\
+Minor in Business Administration\\
+{\itshape Southwestern University, Georgetown, TX}\\[6pt]
+\noindent{\bfseries Associate of Arts in Liberal Arts} \hfill {\color{grayText} May 2018}\\
+{\itshape Blinn College, Bryan, TX}
+
+\vspace{2pt}
+
+\section{Research Experience}
+\vspace{4pt}
+
+\noindent{\bfseries Undergraduate Research Assistant} \hfill {\color{grayText} June 2020 -- Present}\\
+{\itshape Department of Computer Science, Texas A\&M University} \hfill {\color{grayText}\small College Station, TX}
+\begin{itemize}[leftmargin=16pt, itemsep=1pt, topsep=3pt]
+  \item Designed and implemented a REST API (FastAPI, PostgreSQL) to support data collection from learning management systems, enabling research into student behavior patterns
+  \item Developed a full-stack analytical platform (Flask, React, PostgreSQL, Docker) for examining GitHub repository collaboration, used in classroom research studies
+  \item Created novel visualizations to represent multi-contributor collaboration patterns in educational computing contexts
+\end{itemize}
+
+\vspace{6pt}
+
+\noindent{\bfseries Artificial Intelligence Research Assistant} \hfill {\color{grayText} May 2019 -- July 2019}\\
+{\itshape Department of Computer Science, Southwestern University} \hfill {\color{grayText}\small Georgetown, TX}
+\begin{itemize}[leftmargin=16pt, itemsep=1pt, topsep=3pt]
+  \item Investigated algorithmic approaches to procedural dungeon generation, drawing from game design principles in \textit{The Legend of Zelda} series
+  \item Designed and executed a controlled human-subject study evaluating player preference across dungeon generation methodologies
+  \item Contributed 50,000+ lines of code to an established research codebase; maintained version control via Git
+  \item Co-authored an 8-page peer-reviewed paper; delivered multiple oral presentations on campus
+\end{itemize}
+
+\section{Presentations}
+\vspace{4pt}
+
+\noindent\textbf{Ryan, J.} (2019). \textit{Procedural Dungeon Generation: A Comparative Study of Algorithmic Approaches}. Presented at the \textbf{World Conference on Computational Intelligence (WCCI)}, virtual. \\[4pt]
+\noindent\textbf{Ryan, J.} (2019). \textit{Human Perception of Procedurally Generated Game Environments}. Southwestern University Annual Research Symposium, Georgetown, TX.
+
+\section{Industry Experience}
+\vspace{4pt}
+
+\noindent{\bfseries Information Technology Support Specialist} \hfill {\color{grayText} Sep. 2018 -- Present}\\
+{\itshape Office of Technology, Southwestern University} \hfill {\color{grayText}\small Georgetown, TX}
+\begin{itemize}[leftmargin=16pt, itemsep=1pt, topsep=3pt]
+  \item Administered and maintained campus-wide computing infrastructure serving 1,000+ users
+  \item Managed preventive maintenance protocols for 200+ printers and classroom AV equipment
+\end{itemize}
+
+\section{Projects}
+\vspace{4pt}
+
+\noindent{\bfseries Gitlytics} --- \textit{GitHub Classroom Collaboration Analytics Tool} \hfill {\color{grayText} June 2020 -- Present}
+\begin{itemize}[leftmargin=16pt, itemsep=1pt, topsep=3pt]
+  \item Built an open-source full-stack platform for visualizing collaborative coding activity using Flask (REST API) and React; GitHub OAuth integration; async processing via Celery/Redis
+\end{itemize}
+
+\vspace{4pt}
+
+\noindent{\bfseries Simple Paintball} --- \textit{Minecraft Server Plugin} \hfill {\color{grayText} May 2018 -- May 2020}
+\begin{itemize}[leftmargin=16pt, itemsep=1pt, topsep=3pt]
+  \item Designed, published, and maintained a game plugin achieving 2,000+ downloads and a 4.5/5.0 community rating; implemented CI/CD pipeline via TravisCI
+\end{itemize}
+
+\section{Technical Skills}
+\vspace{4pt}
+
+\noindent\begin{tabularx}{\linewidth}{@{}p{0.18\linewidth} X}
+  \textbf{Languages}   & Java, Python, C/C++, SQL (PostgreSQL), JavaScript, HTML/CSS, R \\[2pt]
+  \textbf{Frameworks}  & React, Node.js, Flask, FastAPI, JUnit, WordPress, Material-UI \\[2pt]
+  \textbf{Tools}       & Git, Docker, TravisCI, Google Cloud Platform, VS Code, IntelliJ, PyCharm \\[2pt]
+  \textbf{Libraries}   & pandas, NumPy, Matplotlib \\
+\end{tabularx}
+
+\section{References}
+\vspace{4pt}
+\noindent{\color{grayText}\itshape Available upon request.}
+
+\end{document}

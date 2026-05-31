@@ -9,11 +9,6 @@ const REQUIRED_PERSONAL: (keyof PersonalInfo)[] = [
   "state",
   "zip_code",
   "country",
-  "visa_status",
-  "work_authorization",
-  "require_sponsorship",
-  "expected_graduation",
-  "start_date",
 ];
 
 export function validateProfile(
@@ -31,11 +26,29 @@ export function validateProfile(
   }
 
   if (skills.length === 0) errors.skills = "Add at least one skill";
-  if (!workExperience.some((w) => w.title.trim() || w.company.trim())) {
+
+  const validWork = workExperience.filter((w) => w.title.trim() || w.company.trim());
+  if (validWork.length === 0) {
     errors.work = "Add at least one work experience entry";
+  } else {
+    for (const w of validWork) {
+      if (!w.description.trim()) {
+        errors.work = "Describe what you did in each role";
+        break;
+      }
+    }
   }
-  if (!projects.some((p) => p.name.trim())) {
+
+  const validProjects = projects.filter((p) => p.name.trim());
+  if (validProjects.length === 0) {
     errors.projects = "Add at least one project";
+  } else {
+    for (const p of validProjects) {
+      if (!p.description.trim()) {
+        errors.projects = "Add a description for each project";
+        break;
+      }
+    }
   }
 
   return errors;
@@ -44,6 +57,7 @@ export function validateProfile(
 export interface OnboardingStatus {
   profile_complete: boolean;
   has_resume: boolean;
+  has_template: boolean;
   ready: boolean;
   missing_fields: string[];
   resume_id: string | null;

@@ -12,11 +12,6 @@ REQUIRED_PERSONAL_KEYS = [
     "state",
     "zip_code",
     "country",
-    "visa_status",
-    "work_authorization",
-    "require_sponsorship",
-    "expected_graduation",
-    "start_date",
 ]
 
 
@@ -40,6 +35,20 @@ def _personal_info(profile: dict) -> dict:
         if profile.get(key) and not merged.get(key):
             merged[key] = profile[key]
     return merged
+
+
+def has_template_selected(profile: dict | None) -> bool:
+    if not profile:
+        return False
+    pi = _parse_field(profile, "personal_info")
+    if isinstance(pi, dict) and pi.get("resume_template"):
+        return True
+    return bool(profile.get("resume_template"))
+
+
+def is_onboarding_ready(profile: dict | None, resume_count: int = 0) -> bool:
+    """User is ready once profile is complete and a template is chosen."""
+    return is_profile_complete(profile) and has_template_selected(profile)
 
 
 def is_profile_complete(profile: dict | None) -> bool:
