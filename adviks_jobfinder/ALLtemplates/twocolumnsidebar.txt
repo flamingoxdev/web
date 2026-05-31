@@ -1,0 +1,173 @@
+%-------------------------
+% Template 2: Two-Column Sidebar Modern
+% Dark left sidebar with accent color, clean right content
+%------------------------
+
+\documentclass[letterpaper,10pt]{article}
+
+\usepackage[margin=0pt]{geometry}
+\usepackage{xcolor}
+\usepackage{fontawesome5}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{paracol}
+\usepackage{setspace}
+\usepackage{titlesec}
+
+% Color scheme
+\definecolor{sidebarBg}{HTML}{1A1A2E}
+\definecolor{accentBlue}{HTML}{16213E}
+\definecolor{highlight}{HTML}{0F3460}
+\definecolor{neonAccent}{HTML}{E94560}
+\definecolor{lightText}{HTML}{FFFFFF}
+\definecolor{grayText}{HTML}{AAAAAA}
+\definecolor{mainBg}{HTML}{FAFAFA}
+\definecolor{sectionColor}{HTML}{1A1A2E}
+
+\hypersetup{colorlinks=true, urlcolor=neonAccent, linkcolor=neonAccent}
+\setlength{\parindent}{0pt}
+\pagestyle{empty}
+
+% Sidebar section title
+\newcommand{\sideSection}[1]{%
+  {\color{neonAccent}\rule{\linewidth}{0.8pt}}\\[2pt]
+  {\color{lightText}\large\bfseries #1}\\[4pt]
+}
+
+% Main section title
+\newcommand{\mainSection}[1]{%
+  \vspace{6pt}
+  {\color{sectionColor}\large\bfseries\scshape #1}\\[-2pt]
+  {\color{neonAccent}\rule{\linewidth}{1.2pt}}\\[2pt]
+}
+
+\newcommand{\jobEntry}[4]{%
+  {\bfseries #1} \hfill {\small\color{gray} #2}\\
+  {\small\itshape #3} \hfill {\small\color{gray} #4}\\
+}
+
+\begin{document}
+
+% Two-column layout: 30% sidebar | 70% main
+\columnratio{0.30}
+\begin{paracol}{2}
+
+%--- LEFT SIDEBAR ---%
+\backgroundcolor{c[0](4pt,4pt)(0.5\columnsep,4pt)}{sidebarBg}
+
+\begin{leftcolumn}
+\vspace*{10pt}
+\hspace{4pt}
+\begin{minipage}[t]{0.85\linewidth}
+
+% Name
+{\color{lightText}\LARGE\bfseries Jake}\\[2pt]
+{\color{neonAccent}\LARGE\bfseries Ryan}\\[6pt]
+{\color{grayText}\small Software Engineer}\\[12pt]
+
+\sideSection{Contact}
+{\color{lightText}\scriptsize
+\faPhone\ 123-456-7890 \\[3pt]
+\faEnvelope\ \href{mailto:jake@su.edu}{jake@su.edu} \\[3pt]
+\faLinkedin\ \href{https://linkedin.com/in/jake}{linkedin.com/in/jake} \\[3pt]
+\faGithub\ \href{https://github.com/jake}{github.com/jake} \\[3pt]
+\faMapMarker\ Georgetown, TX
+}\\[10pt]
+
+\sideSection{Skills}
+{\color{lightText}\scriptsize
+\textbf{\color{neonAccent}Languages}\\
+Java \textbullet\ Python \textbullet\ C/C++\\
+JavaScript \textbullet\ SQL \textbullet\ R\\[4pt]
+\textbf{\color{neonAccent}Frameworks}\\
+React \textbullet\ Node.js \textbullet\ Flask\\
+FastAPI \textbullet\ Material-UI\\[4pt]
+\textbf{\color{neonAccent}Tools}\\
+Git \textbullet\ Docker \textbullet\ TravisCI\\
+GCP \textbullet\ VS Code \textbullet\ PyCharm\\[4pt]
+\textbf{\color{neonAccent}Libraries}\\
+pandas \textbullet\ NumPy \textbullet\ Matplotlib
+}\\[10pt]
+
+\sideSection{Education}
+{\color{lightText}\scriptsize
+\textbf{B.A. Computer Science}\\
+{\color{grayText}Minor: Business}\\
+Southwestern University\\
+{\color{grayText}2018 -- 2021}\\[5pt]
+\textbf{A.A. Liberal Arts}\\
+Blinn College\\
+{\color{grayText}2014 -- 2018}
+}\\[10pt]
+
+\sideSection{Links}
+{\color{lightText}\scriptsize
+\faGlobe\ \href{https://github.com/jake}{Portfolio}\\[2pt]
+\faCode\ \href{https://github.com/jake}{GitHub Projects}
+}
+
+\end{minipage}
+\end{leftcolumn}
+
+%--- RIGHT MAIN CONTENT ---%
+\begin{rightcolumn}
+\vspace*{10pt}
+\hspace{4pt}
+\begin{minipage}[t]{0.92\linewidth}
+
+\mainSection{Experience}
+
+\jobEntry{Undergraduate Research Assistant}{June 2020 -- Present}{Texas A\&M University}{College Station, TX}
+\begin{itemize}[leftmargin=12pt, itemsep=-1pt, topsep=2pt]
+  \scriptsize
+  \item Developed a REST API using FastAPI and PostgreSQL for learning management systems
+  \item Built full-stack web application using Flask, React, PostgreSQL and Docker to analyze GitHub data
+  \item Visualized GitHub collaboration patterns in classroom settings
+\end{itemize}
+\vspace{4pt}
+
+\jobEntry{IT Support Specialist}{Sep. 2018 -- Present}{Southwestern University}{Georgetown, TX}
+\begin{itemize}[leftmargin=12pt, itemsep=-1pt, topsep=2pt]
+  \scriptsize
+  \item Communicated with managers to configure and deploy campus computer systems
+  \item Assessed and resolved technical issues for students, faculty, and staff
+  \item Maintained 200+ printers and classroom equipment across campus
+\end{itemize}
+\vspace{4pt}
+
+\jobEntry{AI Research Assistant}{May 2019 -- July 2019}{Southwestern University}{Georgetown, TX}
+\begin{itemize}[leftmargin=12pt, itemsep=-1pt, topsep=2pt]
+  \scriptsize
+  \item Explored procedural dungeon generation methods based on \textit{The Legend of Zelda}
+  \item Developed a Java game to validate generated dungeon structures
+  \item Presented at the World Conference on Computational Intelligence
+\end{itemize}
+\vspace{6pt}
+
+\mainSection{Projects}
+
+{\bfseries Gitlytics} {\small\color{gray}$|$ Python, Flask, React, PostgreSQL, Docker} \hfill {\small\color{gray}June 2020 -- Present}
+\begin{itemize}[leftmargin=12pt, itemsep=-1pt, topsep=2pt]
+  \scriptsize
+  \item Full-stack web app with Flask REST API and React frontend
+  \item Implemented GitHub OAuth for repository data access and visualization
+  \item Used Celery and Redis for asynchronous background task processing
+\end{itemize}
+\vspace{4pt}
+
+{\bfseries Simple Paintball} {\small\color{gray}$|$ Spigot API, Java, Maven, TravisCI} \hfill {\small\color{gray}May 2018 -- May 2020}
+\begin{itemize}[leftmargin=12pt, itemsep=-1pt, topsep=2pt]
+  \scriptsize
+  \item Minecraft server plugin with 2K+ downloads and 4.5/5-star rating
+  \item Set up CI/CD pipeline with TravisCI for automated builds
+\end{itemize}
+
+\end{minipage}
+\end{rightcolumn}
+
+\end{paracol}
+\end{document}

@@ -35,36 +35,31 @@ export default function Header() {
       <div className="mx-auto flex max-w-7xl items-center justify-between">
         <div className="flex items-center gap-6">
           {/* Logo + title */}
-          <Link href="/" className="flex items-center gap-3">
+          <Link href="/dashboard" className="flex items-center gap-3">
             <div className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-accent-cyan to-accent-violet">
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-background"
-              >
-                <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                <path d="M2 17l10 5 10-5" />
-                <path d="M2 12l10 5 10-5" />
-              </svg>
+              <span className="text-lg">🦩</span>
             </div>
             <span className="font-[family-name:var(--font-syne)] text-xl font-bold tracking-tight">
-              Intern
+              Flamingo
               <span className="bg-gradient-to-r from-accent-cyan to-accent-violet bg-clip-text text-transparent">
-                Match
-              </span>{" "}
-              <span className="font-light text-muted">AI</span>
+                .ai
+              </span>
             </span>
           </Link>
 
-          {/* Nav links */}
+          {/* Nav links — exactly 4 options as requested */}
           {user && (
             <nav className="flex items-center gap-1">
+              <Link
+                href="/dashboard"
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors
+                  ${pathname === "/dashboard"
+                    ? "bg-accent-cyan/10 text-accent-cyan"
+                    : "text-muted hover:text-foreground hover:bg-surface-raised"
+                  }`}
+              >
+                Dashboard
+              </Link>
               <Link
                 href="/profile"
                 className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors
@@ -80,20 +75,26 @@ export default function Header() {
                 Profile
               </Link>
               <Link
-                href="/roadmap"
+                href="/templates"
                 className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors
-                  ${pathname === "/roadmap"
-                    ? "bg-accent-violet/10 text-accent-violet"
+                  ${pathname === "/templates"
+                    ? "bg-accent-emerald/10 text-accent-emerald"
                     : "text-muted hover:text-foreground hover:bg-surface-raised"
                   }`}
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 3h7v7H3z" />
-                  <path d="M14 3h7v7h-7z" />
-                  <path d="M14 14h7v7h-7z" />
-                  <path d="M3 14h7v7H3z" />
-                </svg>
-                Roadmap
+                <span>📄</span>
+                Templates
+              </Link>
+              <Link
+                href="/copilot"
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors
+                  ${pathname === "/copilot"
+                    ? "bg-accent-amber/10 text-accent-amber"
+                    : "text-muted hover:text-foreground hover:bg-surface-raised"
+                  }`}
+              >
+                <span>🤖</span>
+                AI Assistant
               </Link>
             </nav>
           )}

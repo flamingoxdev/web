@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Syne, IBM_Plex_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import AuthGuard from "./components/AuthGuard";
+import AuthGuard from "./components/OnboardingGuard";
 
 const syne = Syne({
   variable: "--font-syne",
@@ -24,9 +24,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "InternMatch AI — Find Your Perfect Internship",
-  description:
-    "Upload your resume and get AI-ranked internship matches in seconds.",
+  title: "Flamingo.ai — Find & Apply to Internships",
+  description: "Upload your profile and resume, get AI-ranked matches, and auto-fill applications.",
 };
 
 export default function RootLayout({
@@ -38,6 +37,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${syne.variable} ${ibmPlexSans.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      data-scroll-behavior="smooth"
     >
       <body className="min-h-full flex flex-col">
         <AuthGuard>{children}</AuthGuard>

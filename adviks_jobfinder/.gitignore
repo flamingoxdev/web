@@ -1,15 +1,48 @@
+# Python
 .venv/
+venv/
 __pycache__/
 *.pyc
-*.db
+*.pyo
+*.pyd
+
+# Environment
 .env
 .env.local
-.env*.local
-node_modules/
-.next/
+.env.*.local
+!.env.example
+
+# Database / cache
+*.db
+*.sqlite3
 embeddings/
 *.index
-.DS_Store
-*.log
+*.faiss
+
+# Node
+node_modules/
+.next/
+out/
+.turbo/
+
+# Playwright
+.internmatch-chrome/
+playwright-report/
+test-results/
+
+# Build / logs
 dist/
 build/
+*.log
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+
+# TypeScript
+*.tsbuildinfo
+
+# Vercel
+.vercel

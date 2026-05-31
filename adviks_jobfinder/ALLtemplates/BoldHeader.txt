@@ -1,0 +1,189 @@
+%-------------------------
+% Template 9: Infographic / Visual Style
+% Large header, skill bars, icon-enhanced sections
+%------------------------
+
+\documentclass[letterpaper,10pt]{article}
+
+\usepackage[top=0in, bottom=0.4in, left=0in, right=0in]{geometry}
+\usepackage{xcolor}
+\usepackage{fontawesome5}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{tikz}
+\usepackage{paracol}
+
+% Color palette
+\definecolor{headerBg}{HTML}{212F3C}
+\definecolor{accentTeal}{HTML}{1ABC9C}
+\definecolor{accentOrange}{HTML}{E67E22}
+\definecolor{softBg}{HTML}{F4F6F7}
+\definecolor{darkText}{HTML}{2C3E50}
+\definecolor{grayText}{HTML}{7F8C8D}
+\definecolor{sidebarBg}{HTML}{EBF5FB}
+\definecolor{barFill}{HTML}{1ABC9C}
+\definecolor{barEmpty}{HTML}{D5D8DC}
+
+\hypersetup{colorlinks=true, urlcolor=accentTeal}
+\setlength{\parindent}{0pt}
+\pagestyle{empty}
+
+% Skill bar command
+\newcommand{\skillbar}[2]{%
+  \noindent\begin{tikzpicture}[baseline]
+    \fill[barEmpty] (0,0) rectangle (3cm, 0.18cm);
+    \fill[barFill]  (0,0) rectangle (#2*3cm, 0.18cm);
+  \end{tikzpicture}
+  \hspace{4pt}{\scriptsize\color{darkText} #1}\\[3pt]
+}
+
+\newcommand{\infoSection}[2]{%
+  \vspace{5pt}
+  \noindent{\color{#1}\faSquare}\ {\bfseries\color{darkText}\small\uppercase{#2}}\\[-2pt]
+  {\color{#1}\rule{\linewidth}{0.8pt}}\\[2pt]
+}
+
+\begin{document}
+
+%---- BIG HEADER BANNER ----%
+\noindent\colorbox{headerBg}{\makebox[\linewidth][c]{%
+  \begin{minipage}{0.85\linewidth}
+  \vspace{12pt}
+  \begin{center}
+    {\color{white}\Huge\bfseries JAKE RYAN}\\[4pt]
+    {\color{accentTeal}\large Software Engineer \textbullet\ AI Researcher \textbullet\ Full-Stack Developer}\\[6pt]
+    {\color{white}\scriptsize
+      \faPhone\ 123-456-7890 \quad
+      \faEnvelope\ \href{mailto:jake@su.edu}{jake@su.edu} \quad
+      \faLinkedin\ \href{https://linkedin.com/in/jake}{linkedin.com/in/jake} \quad
+      \faGithub\ \href{https://github.com/jake}{github.com/jake}
+    }
+  \end{center}
+  \vspace{8pt}
+  \end{minipage}
+}}
+
+\vspace{0pt}
+
+\columnratio{0.35}
+\begin{paracol}{2}
+\backgroundcolor{c[0](0pt,0pt)(0.5\columnsep,0pt)}{sidebarBg}
+
+%---- LEFT SIDEBAR ----%
+\begin{leftcolumn}
+\hspace{8pt}
+\begin{minipage}{0.88\linewidth}
+\vspace{8pt}
+
+\infoSection{accentTeal}{Education}
+{\small\bfseries Southwestern University}\\
+{\scriptsize\color{grayText} B.A. Computer Science\\Minor: Business\\2018 -- 2021}\\[5pt]
+{\small\bfseries Blinn College}\\
+{\scriptsize\color{grayText} A.A. Liberal Arts\\2014 -- 2018}
+
+\infoSection{accentOrange}{Technical Skills}
+{\scriptsize\bfseries\color{grayText} LANGUAGES}\\
+\skillbar{Java}{0.95}
+\skillbar{Python}{0.90}
+\skillbar{JavaScript}{0.80}
+\skillbar{C/C++}{0.70}
+\skillbar{SQL}{0.85}
+\skillbar{R}{0.60}
+
+\vspace{4pt}
+{\scriptsize\bfseries\color{grayText} FRAMEWORKS}\\
+\skillbar{React}{0.85}
+\skillbar{Flask}{0.90}
+\skillbar{FastAPI}{0.85}
+\skillbar{Node.js}{0.75}
+
+\vspace{4pt}
+{\scriptsize\bfseries\color{grayText} TOOLS}\\
+\skillbar{Git}{0.95}
+\skillbar{Docker}{0.80}
+\skillbar{TravisCI}{0.75}
+\skillbar{GCP}{0.70}
+
+\infoSection{accentTeal}{Libraries}
+{\scriptsize\color{darkText}
+pandas \textbullet\ NumPy\\
+Matplotlib \textbullet\ Material-UI
+}
+
+\end{minipage}
+\end{leftcolumn}
+
+%---- RIGHT MAIN ----%
+\begin{rightcolumn}
+\hspace{6pt}
+\begin{minipage}{0.92\linewidth}
+\vspace{8pt}
+
+\infoSection{accentTeal}{Experience}
+
+\noindent\colorbox{accentTeal!15}{\begin{minipage}{\linewidth}
+  \vspace{2pt}\hspace{4pt}
+  {\bfseries\small\color{darkText} Undergraduate Research Assistant} \hfill {\scriptsize\color{accentTeal}\bfseries Jun 2020 -- Present}\\
+  \hspace{4pt}{\scriptsize\color{grayText} Texas A\&M University \hfill College Station, TX}
+  \vspace{2pt}
+\end{minipage}}
+\begin{itemize}[leftmargin=12pt, itemsep=0pt, topsep=2pt, label={\color{accentTeal}\tiny$\blacksquare$}]
+  \scriptsize
+  \item REST API (FastAPI, PostgreSQL) for learning management system data
+  \item Full-stack GitHub analytics app: Flask + React + PostgreSQL + Docker
+  \item Collaboration dashboards for classroom GitHub activity visualization
+\end{itemize}
+
+\vspace{4pt}
+
+\noindent\colorbox{accentOrange!15}{\begin{minipage}{\linewidth}
+  \vspace{2pt}\hspace{4pt}
+  {\bfseries\small\color{darkText} IT Support Specialist} \hfill {\scriptsize\color{accentOrange}\bfseries Sep 2018 -- Present}\\
+  \hspace{4pt}{\scriptsize\color{grayText} Southwestern University \hfill Georgetown, TX}
+  \vspace{2pt}
+\end{minipage}}
+\begin{itemize}[leftmargin=12pt, itemsep=0pt, topsep=2pt, label={\color{accentOrange}\tiny$\blacksquare$}]
+  \scriptsize
+  \item Campus computer systems management; 1,000+ user support
+  \item Maintained 200+ printers and classroom AV equipment
+\end{itemize}
+
+\vspace{4pt}
+
+\noindent\colorbox{accentTeal!10}{\begin{minipage}{\linewidth}
+  \vspace{2pt}\hspace{4pt}
+  {\bfseries\small\color{darkText} AI Research Assistant} \hfill {\scriptsize\color{accentTeal}\bfseries May -- Jul 2019}\\
+  \hspace{4pt}{\scriptsize\color{grayText} Southwestern University \hfill Georgetown, TX}
+  \vspace{2pt}
+\end{minipage}}
+\begin{itemize}[leftmargin=12pt, itemsep=0pt, topsep=2pt, label={\color{accentTeal}\tiny$\blacksquare$}]
+  \scriptsize
+  \item Procedural dungeon generation research; 50K+ lines contributed
+  \item 8-page paper; WCCI international conference presentation
+\end{itemize}
+
+\vspace{2pt}
+\infoSection{accentOrange}{Projects}
+
+\noindent{\bfseries\small\color{darkText} Gitlytics} \hfill {\scriptsize\color{grayText} Jun 2020 -- Present}\\
+{\scriptsize\color{grayText}\itshape Python \textbullet\ Flask \textbullet\ React \textbullet\ PostgreSQL \textbullet\ Docker \textbullet\ Celery}
+\begin{itemize}[leftmargin=12pt, itemsep=0pt, topsep=1pt, label={\color{accentOrange}\tiny$\blacksquare$}]
+  \scriptsize
+  \item Flask REST API + React SPA; GitHub OAuth; async via Celery + Redis
+\end{itemize}
+
+\vspace{3pt}
+\noindent{\bfseries\small\color{darkText} Simple Paintball} \hfill {\scriptsize\color{grayText} May 2018 -- May 2020}\\
+{\scriptsize\color{grayText}\itshape Java \textbullet\ Spigot API \textbullet\ Maven \textbullet\ TravisCI \textbullet\ Git}
+\begin{itemize}[leftmargin=12pt, itemsep=0pt, topsep=1pt, label={\color{accentOrange}\tiny$\blacksquare$}]
+  \scriptsize
+  \item 2K+ downloads, 4.5/5 stars; automated CI/CD with TravisCI
+\end{itemize}
+
+\end{minipage}
+\end{rightcolumn}
+
+\end{paracol}
+\end{document}

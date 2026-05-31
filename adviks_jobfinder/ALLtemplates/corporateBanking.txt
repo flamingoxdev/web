@@ -1,0 +1,119 @@
+%-------------------------
+% Template 4: Corporate Executive (Serif, Formal)
+% Ultra-professional, banking/consulting/finance style
+%------------------------
+
+\documentclass[letterpaper,11pt]{article}
+
+\usepackage[top=0.6in, bottom=0.6in, left=0.75in, right=0.75in]{geometry}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage[T1]{fontenc}
+\usepackage{charter}  % Elegant serif font
+
+\definecolor{deepBlue}{HTML}{003366}
+\definecolor{midGray}{HTML}{444444}
+\definecolor{ruleColor}{HTML}{003366}
+
+\hypersetup{colorlinks=false}
+\setlength{\parindent}{0pt}
+\pagestyle{empty}
+
+\titleformat{\section}
+  {\color{deepBlue}\large\bfseries\scshape}
+  {}{0em}{}
+  [\color{ruleColor}\titlerule]
+
+\newcommand{\corpEntry}[4]{%
+  \vspace{3pt}
+  \noindent{\bfseries #1} \hfill {\itshape #2}\\
+  {\itshape\color{midGray} #3} \hfill {\itshape\color{midGray}\small #4}\\
+}
+
+\begin{document}
+
+% Name header — formal, centered, understated
+\begin{center}
+  {\huge\bfseries\scshape\color{deepBlue} Jake Ryan}\\[4pt]
+  {\small\color{midGray}
+    123-456-7890 \quad $\vert$ \quad jake@su.edu \quad $\vert$ \quad linkedin.com/in/jake \quad $\vert$ \quad github.com/jake
+  }\\[4pt]
+  {\small Georgetown, Texas}
+\end{center}
+
+\vspace{4pt}
+\noindent{\color{deepBlue}\rule{\linewidth}{1.5pt}}
+
+\vspace{6pt}
+
+\section*{Education}
+\vspace{2pt}
+\corpEntry{Southwestern University}{Georgetown, TX}{Bachelor of Arts in Computer Science, Minor in Business}{August 2018 -- May 2021}
+\vspace{5pt}
+\corpEntry{Blinn College}{Bryan, TX}{Associate of Arts in Liberal Arts}{August 2014 -- May 2018}
+
+\vspace{6pt}
+
+\section*{Professional Experience}
+\vspace{2pt}
+
+\corpEntry{Undergraduate Research Assistant}{June 2020 -- Present}{Texas A\&M University, Department of Computer Science}{College Station, TX}
+\begin{itemize}[leftmargin=18pt, itemsep=0pt, topsep=3pt]
+  \item Engineered a production-grade REST API using FastAPI and PostgreSQL supporting learning management system data
+  \item Designed and deployed a full-stack application (Flask, React, PostgreSQL, Docker) for GitHub repository analytics
+  \item Developed data visualizations to surface collaboration trends across academic GitHub classrooms
+\end{itemize}
+\vspace{6pt}
+
+\corpEntry{Information Technology Support Specialist}{September 2018 -- Present}{Southwestern University, Office of Technology}{Georgetown, TX}
+\begin{itemize}[leftmargin=18pt, itemsep=0pt, topsep=3pt]
+  \item Collaborated with senior administrators to configure and standardize 200+ campus computer workstations
+  \item Delivered technical support services for diverse end-user base including faculty, staff, and students
+  \item Established preventive maintenance protocols for printers and classroom audio-visual equipment
+\end{itemize}
+\vspace{6pt}
+
+\corpEntry{Artificial Intelligence Research Assistant}{May 2019 -- July 2019}{Southwestern University, Research Division}{Georgetown, TX}
+\begin{itemize}[leftmargin=18pt, itemsep=0pt, topsep=3pt]
+  \item Investigated procedural content generation techniques, contributing 50,000+ lines of code to the research codebase
+  \item Designed and conducted human-subject study evaluating dungeon generation algorithm quality
+  \item Authored an 8-page research paper and delivered presentations at the World Conference on Computational Intelligence
+\end{itemize}
+
+\vspace{6pt}
+
+\section*{Selected Projects}
+\vspace{2pt}
+
+\corpEntry{Gitlytics}{June 2020 -- Present}{\textit{Python, Flask, React, PostgreSQL, Docker, Celery, Redis}}{}
+\begin{itemize}[leftmargin=18pt, itemsep=0pt, topsep=3pt]
+  \item Architected full-stack web application utilizing Flask REST API with React frontend and GitHub OAuth integration
+  \item Implemented asynchronous task queuing via Celery and Redis to enhance system performance and scalability
+\end{itemize}
+\vspace{4pt}
+
+\corpEntry{Simple Paintball}{May 2018 -- May 2020}{\textit{Java, Spigot API, Maven, TravisCI, Git}}{}
+\begin{itemize}[leftmargin=18pt, itemsep=0pt, topsep=3pt]
+  \item Developed and published a Minecraft server plugin achieving 2,000+ downloads with a 4.5/5.0 average rating
+  \item Established automated continuous delivery pipeline leveraging TravisCI for build and release management
+\end{itemize}
+
+\vspace{6pt}
+
+\section*{Technical Competencies}
+\vspace{4pt}
+\noindent\begin{tabular}{@{}p{0.18\linewidth} p{0.78\linewidth}}
+  \textbf{Languages}   & Java, Python, C/C++, SQL (PostgreSQL), JavaScript, HTML/CSS, R \\[3pt]
+  \textbf{Frameworks}  & React, Node.js, Flask, FastAPI, JUnit, WordPress, Material-UI \\[3pt]
+  \textbf{Tools}       & Git, Docker, TravisCI, Google Cloud Platform, VS Code, IntelliJ, PyCharm \\[3pt]
+  \textbf{Libraries}   & pandas, NumPy, Matplotlib \\
+\end{tabular}
+
+\vspace{8pt}
+\noindent{\color{deepBlue}\rule{\linewidth}{1.5pt}}
+
+\end{document}

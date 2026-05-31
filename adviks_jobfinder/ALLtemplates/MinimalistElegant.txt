@@ -1,0 +1,141 @@
+%-------------------------
+% Template 3: Minimalist Elegant
+% Top color bar, clean whitespace, refined typography
+%------------------------
+
+\documentclass[letterpaper,10.5pt]{article}
+
+\usepackage[top=0in, bottom=0.5in, left=0.6in, right=0.6in]{geometry}
+\usepackage{xcolor}
+\usepackage{fontawesome5}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{multicol}
+\usepackage{array}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+% Elegant color palette
+\definecolor{accentGold}{HTML}{C9A84C}
+\definecolor{darkNavy}{HTML}{1B2540}
+\definecolor{medGray}{HTML}{555555}
+\definecolor{lightGray}{HTML}{999999}
+\definecolor{ruleLine}{HTML}{C9A84C}
+
+\hypersetup{colorlinks=true, urlcolor=darkNavy}
+\setlength{\parindent}{0pt}
+\pagestyle{empty}
+
+% Top accent bar
+\newcommand{\topBar}{%
+  \noindent\colorbox{darkNavy}{\makebox[\linewidth][c]{%
+    \color{white}\rule{0pt}{8pt}%
+  }}\\[-2pt]
+  \noindent\colorbox{accentGold}{\makebox[\linewidth][c]{%
+    \color{accentGold}\rule{0pt}{3pt}%
+  }}\\[12pt]
+}
+
+\newcommand{\elegantSection}[1]{%
+  \vspace{8pt}
+  \noindent{\color{darkNavy}\large\bfseries\scshape #1}\\[-6pt]
+  \noindent{\color{accentGold}\rule{\linewidth}{0.8pt}}\\[3pt]
+}
+
+\newcommand{\expEntry}[4]{%
+  \noindent\begin{minipage}[t]{0.6\linewidth}
+    {\bfseries\color{darkNavy} #1}\\
+    {\small\itshape\color{medGray} #3}
+  \end{minipage}%
+  \begin{minipage}[t]{0.4\linewidth}
+    \raggedleft
+    {\small\color{lightGray} #4}\\
+    {\small\color{lightGray} #2}
+  \end{minipage}\\[2pt]
+}
+
+\begin{document}
+
+\topBar
+
+% Header
+\begin{center}
+  {\color{darkNavy}\Huge\bfseries\scshape Jake Ryan}\\[4pt]
+  {\color{medGray}\small Software Engineer \textcolor{accentGold}{$\diamond$} Full-Stack Developer \textcolor{accentGold}{$\diamond$} AI Researcher}\\[5pt]
+  {\scriptsize\color{lightGray}
+    \faPhone\ 123-456-7890 \quad
+    \faEnvelope\ \href{mailto:jake@su.edu}{jake@su.edu} \quad
+    \faLinkedin\ \href{https://linkedin.com/in/jake}{linkedin.com/in/jake} \quad
+    \faGithub\ \href{https://github.com/jake}{github.com/jake}
+  }
+\end{center}
+
+\vspace{4pt}
+
+\elegantSection{Education}
+
+\expEntry{Southwestern University}{Aug. 2018 -- May 2021}{B.A. Computer Science, Minor in Business}{Georgetown, TX}
+\expEntry{Blinn College}{Aug. 2014 -- May 2018}{Associate's in Liberal Arts}{Bryan, TX}
+
+\elegantSection{Experience}
+
+\expEntry{Undergraduate Research Assistant}{June 2020 -- Present}{Texas A\&M University}{College Station, TX}
+\begin{itemize}[leftmargin=14pt, itemsep=0pt, topsep=1pt]
+  \small
+  \item[\color{accentGold}$\triangleright$] Developed a REST API using FastAPI and PostgreSQL to store data from learning management systems
+  \item[\color{accentGold}$\triangleright$] Built full-stack web application (Flask, React, PostgreSQL, Docker) to analyze GitHub collaboration data
+  \item[\color{accentGold}$\triangleright$] Designed interactive visualizations for GitHub classroom collaboration patterns
+\end{itemize}
+\vspace{4pt}
+
+\expEntry{Information Technology Support Specialist}{Sep. 2018 -- Present}{Southwestern University}{Georgetown, TX}
+\begin{itemize}[leftmargin=14pt, itemsep=0pt, topsep=1pt]
+  \small
+  \item[\color{accentGold}$\triangleright$] Configured and deployed campus-wide computer systems in coordination with management
+  \item[\color{accentGold}$\triangleright$] Provided technical troubleshooting for students, faculty, and staff
+  \item[\color{accentGold}$\triangleright$] Maintained 200+ printers and classroom equipment across campus
+\end{itemize}
+\vspace{4pt}
+
+\expEntry{AI Research Assistant}{May 2019 -- July 2019}{Southwestern University}{Georgetown, TX}
+\begin{itemize}[leftmargin=14pt, itemsep=0pt, topsep=1pt]
+  \small
+  \item[\color{accentGold}$\triangleright$] Researched procedural dungeon generation methods inspired by \textit{The Legend of Zelda}
+  \item[\color{accentGold}$\triangleright$] Developed Java game prototype; contributed 50K+ lines of code via Git
+  \item[\color{accentGold}$\triangleright$] Presented research virtually at the World Conference on Computational Intelligence
+\end{itemize}
+
+\elegantSection{Projects}
+
+\noindent{\bfseries\color{darkNavy} Gitlytics} \hfill {\small\color{lightGray} June 2020 -- Present}\\
+{\small\color{medGray}\textit{Python, Flask, React, PostgreSQL, Docker}}\\
+\begin{itemize}[leftmargin=14pt, itemsep=0pt, topsep=1pt]
+  \small
+  \item[\color{accentGold}$\triangleright$] Full-stack app with Flask REST API, React frontend, GitHub OAuth integration
+  \item[\color{accentGold}$\triangleright$] Asynchronous processing via Celery and Redis; live collaboration visualizations
+\end{itemize}
+\vspace{4pt}
+
+\noindent{\bfseries\color{darkNavy} Simple Paintball} \hfill {\small\color{lightGray} May 2018 -- May 2020}\\
+{\small\color{medGray}\textit{Spigot API, Java, Maven, TravisCI, Git}}\\
+\begin{itemize}[leftmargin=14pt, itemsep=0pt, topsep=1pt]
+  \small
+  \item[\color{accentGold}$\triangleright$] Minecraft server plugin with 2K+ downloads and 4.5/5-star community rating
+  \item[\color{accentGold}$\triangleright$] Implemented CI/CD pipeline with TravisCI for automated release builds
+\end{itemize}
+
+\elegantSection{Technical Skills}
+
+\noindent\begin{tabular}{@{}p{0.16\linewidth} p{0.80\linewidth}}
+  {\small\bfseries\color{darkNavy} Languages}   & {\small Java, Python, C/C++, SQL (Postgres), JavaScript, HTML/CSS, R} \\[2pt]
+  {\small\bfseries\color{darkNavy} Frameworks}  & {\small React, Node.js, Flask, JUnit, WordPress, Material-UI, FastAPI} \\[2pt]
+  {\small\bfseries\color{darkNavy} Dev Tools}   & {\small Git, Docker, TravisCI, Google Cloud Platform, VS Code, PyCharm, IntelliJ} \\[2pt]
+  {\small\bfseries\color{darkNavy} Libraries}   & {\small pandas, NumPy, Matplotlib} \\
+\end{tabular}
+
+\vspace{8pt}
+\noindent{\color{accentGold}\rule{\linewidth}{0.8pt}}\\[-2pt]
+\noindent{\color{darkNavy}\rule{\linewidth}{3pt}}
+
+\end{document}

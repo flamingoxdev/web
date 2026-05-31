@@ -2,17 +2,17 @@
 Supabase database layer — replaces the old SQLite db.py.
 
 Tables expected in Supabase:
-  profiles, resumes, jobs, roadmaps, polished_data, applications
+  profiles, resumes, jobs, roadmaps, polished_data, applications,
+  build_sessions, application_packages
 """
 
 import json, os
+from pathlib import Path
 from dotenv import load_dotenv
 from supabase import create_client, Client
 
-load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
-
-SUPABASE_URL = os.getenv("SUPABASE_URL", "")
-SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
+_ENV_PATH = Path(__file__).resolve().parent.parent / ".env"
+load_dotenv(_ENV_PATH, override=False)
 
 _client: Client | None = None
 
@@ -20,7 +20,19 @@ _client: Client | None = None
 def get_client() -> Client:
     global _client
     if _client is None:
-        _client = create_client(SUPABASE_URL, SUPABASE_KEY)
+        url = os.getenv("SUPABASE_URL", "")
+        key = os.getenv("SUPABASE_SERVICE_KEY", "")
+        if not url or not key:
+            # Re-read from .env in case it was created after the process started.
+            load_dotenv(_ENV_PATH, override=True)
+            url = os.getenv("SUPABASE_URL", "")
+            key = os.getenv("SUPABASE_SERVICE_KEY", "")
+        if not url or not key:
+            raise RuntimeError(
+                f"Supabase DB env not configured. Ensure {_ENV_PATH} has "
+                "SUPABASE_URL and SUPABASE_SERVICE_KEY, then restart uvicorn."
+            )
+        _client = create_client(url, key)
     return _client
 
 
@@ -34,9 +46,20 @@ def upsert_profile(user_id: str, data: dict) -> dict:
 
 
 def get_profile(user_id: str) -> dict | None:
-    res = get_client().table("profiles").select("*").eq("user_id", user_id).maybe_single().execute()
-    # supabase-py returns None (not a response object) when no row matches
-    return res.data if res is not None else None
+    try:
+        res = (
+            get_client()
+            .table("profiles")
+            .select("*")
+            .eq("user_id", user_id)
+            .maybe_single()
+            .execute()
+        )
+        if res is None:
+            return None
+        return res.data
+    except Exception:
+        return None
 
 
 # ── Resumes ─────────────────────────────────────────────────────────────────
@@ -180,3 +203,67 @@ def get_applications(user_id: str) -> list[dict]:
            .order("created_at", desc=True)
            .execute())
     return res.data or []
+
+
+# ── Build Sessions (resume wizard) — in-memory ──────────────────────────────
+# We keep these in RAM only; no Supabase table needed.
+_build_sessions: dict[str, dict] = {}
+
+
+def save_build_session(session_id: str, user_id: str, step: int, answers: dict) -> dict:
+    _build_sessions[session_id] = {
+        "id": session_id,
+        "user_id": user_id,
+        "step": step,
+        "answers": answers,
+    }
+    return _build_sessions[session_id]
+
+
+def get_build_session(session_id: str) -> dict | None:
+    return _build_sessions.get(session_id)
+
+
+def delete_build_session(session_id: str) -> None:
+    _build_sessions.pop(session_id, None)
+
+
+# ── Application Packages ────────────────────────────────────────────────────
+
+def save_application_package(
+    user_id: str,
+    resume_id: str,
+    job_title: str,
+    company: str,
+    job_url: str,
+    package: dict,
+) -> dict:
+    payload = {
+        "user_id": user_id,
+        "resume_id": resume_id,
+        "job_title": job_title,
+        "company": company,
+        "job_url": job_url,
+        "cover_letter": package.get("cover_letter", ""),
+        "professional_bio": package.get("professional_bio", ""),
+        "linkedin_summary": package.get("linkedin_summary", ""),
+        "recruiter_message": package.get("recruiter_message", ""),
+    }
+    res = get_client().table("application_packages").insert(payload).execute()
+    return res.data[0] if res.data else {}
+
+
+def get_application_packages(user_id: str) -> list[dict]:
+    res = (
+        get_client().table("application_packages")
+        .select("*")
+        .eq("user_id", user_id)
+        .order("created_at", desc=True)
+        .execute()
+    )
+    return res.data or []
+
+
+def get_application_package(package_id: int) -> dict | None:
+    res = get_client().table("application_packages").select("*").eq("id", package_id).maybe_single().execute()
+    return res.data if res is not None else None

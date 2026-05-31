@@ -1,0 +1,117 @@
+%-------------------------
+% Template 7: Ultra Minimalist (Scandinavian)
+% Extreme whitespace, thin lines, refined simplicity
+%------------------------
+
+\documentclass[letterpaper,10.5pt]{article}
+
+\usepackage[top=0.7in, bottom=0.7in, left=0.8in, right=0.8in]{geometry}
+\usepackage{xcolor}
+\usepackage{fontawesome5}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+
+\definecolor{black}{HTML}{111111}
+\definecolor{accentRed}{HTML}{CC2936}
+\definecolor{softGray}{HTML}{888888}
+\definecolor{ruleGray}{HTML}{DDDDDD}
+
+\hypersetup{colorlinks=true, urlcolor=accentRed}
+\setlength{\parindent}{0pt}
+\pagestyle{empty}
+
+\titleformat{\section}
+  {\vspace{6pt}\color{black}\normalsize\bfseries\uppercase}
+  {}{0em}{}
+  [{\color{ruleGray}\titlerule[0.4pt]}]
+
+\newcommand{\entry}[4]{%
+  \noindent\begin{minipage}[t]{0.72\linewidth}
+    {\bfseries #1}\\
+    {\small\color{softGray} #3}
+  \end{minipage}%
+  \begin{minipage}[t]{0.28\linewidth}
+    \raggedleft
+    {\small\color{softGray} #2}\\
+    {\small\color{softGray} #4}
+  \end{minipage}\\[2pt]
+}
+
+\begin{document}
+
+% Minimal header
+\begin{center}
+  {\Huge\bfseries Jake Ryan}\\[6pt]
+  {\small\color{softGray}
+    \faPhone\ 123-456-7890 \quad
+    \href{mailto:jake@su.edu}{jake@su.edu} \quad
+    \href{https://linkedin.com/in/jake}{linkedin.com/in/jake} \quad
+    \href{https://github.com/jake}{github.com/jake}
+  }
+\end{center}
+
+\vspace{4pt}
+
+\section{Education}
+
+\entry{Southwestern University}{Georgetown, TX}{B.A. Computer Science, Minor in Business}{Aug 2018 -- May 2021}
+\vspace{4pt}
+\entry{Blinn College}{Bryan, TX}{Associate's in Liberal Arts}{Aug 2014 -- May 2018}
+
+\section{Experience}
+
+\entry{Undergraduate Research Assistant}{Jun 2020 -- Present}{Texas A\&M University}{College Station, TX}
+\begin{itemize}[leftmargin=16pt, itemsep=0pt, topsep=2pt]
+  \small
+  \item Developed REST API (FastAPI, PostgreSQL) for learning management system data
+  \item Built full-stack GitHub analytics platform using Flask, React, PostgreSQL, Docker
+  \item Designed visualizations for classroom GitHub collaboration patterns
+\end{itemize}
+\vspace{6pt}
+
+\entry{IT Support Specialist}{Sep 2018 -- Present}{Southwestern University}{Georgetown, TX}
+\begin{itemize}[leftmargin=16pt, itemsep=0pt, topsep=2pt]
+  \small
+  \item Configured campus computer systems; supported 1,000+ users
+  \item Maintained 200+ printers and classroom equipment across campus
+\end{itemize}
+\vspace{6pt}
+
+\entry{AI Research Assistant}{May -- Jul 2019}{Southwestern University}{Georgetown, TX}
+\begin{itemize}[leftmargin=16pt, itemsep=0pt, topsep=2pt]
+  \small
+  \item Researched procedural dungeon generation; contributed 50K+ lines of code
+  \item Published research paper; presented at World Conference on Computational Intelligence
+\end{itemize}
+
+\section{Projects}
+
+\entry{Gitlytics}{Jun 2020 -- Present}{Python, Flask, React, PostgreSQL, Docker, Celery, Redis}{}
+\begin{itemize}[leftmargin=16pt, itemsep=0pt, topsep=2pt]
+  \small
+  \item Flask REST API with React frontend; GitHub OAuth for repository data access
+  \item Async task processing via Celery + Redis; live collaboration visualizations
+\end{itemize}
+\vspace{6pt}
+
+\entry{Simple Paintball}{May 2018 -- May 2020}{Java, Spigot API, Maven, TravisCI, Git}{}
+\begin{itemize}[leftmargin=16pt, itemsep=0pt, topsep=2pt]
+  \small
+  \item Minecraft plugin with 2K+ downloads and 4.5/5 community rating
+  \item CI/CD pipeline via TravisCI for automated release management
+\end{itemize}
+
+\section{Skills}
+
+\noindent\begin{tabular}{@{}p{0.12\linewidth} p{0.84\linewidth}}
+  {\small\color{softGray} Languages}  & {\small Java, Python, C/C++, SQL, JavaScript, HTML/CSS, R} \\[2pt]
+  {\small\color{softGray} Frameworks} & {\small React, Node.js, Flask, FastAPI, JUnit, Material-UI} \\[2pt]
+  {\small\color{softGray} Tools}      & {\small Git, Docker, TravisCI, Google Cloud, VS Code, PyCharm, IntelliJ} \\[2pt]
+  {\small\color{softGray} Libraries}  & {\small pandas, NumPy, Matplotlib} \\
+\end{tabular}
+
+\end{document}

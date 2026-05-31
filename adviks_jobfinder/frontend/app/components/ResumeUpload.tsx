@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { createClient } from "../lib/supabase";
+import { API_URL } from "../lib/api";
 
 interface ResumeUploadProps {
   onUploadComplete: (data: {
@@ -41,8 +42,11 @@ export default function ResumeUpload({
 
   const handleFile = useCallback(
     async (file: File) => {
-      if (file.type !== "application/pdf") {
-        setError("Only PDF files are accepted");
+      const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+      const isTxt = file.type === "text/plain" || file.name.toLowerCase().endsWith(".txt");
+      const isTex = file.name.toLowerCase().endsWith(".tex");
+      if (!isPdf && !isTxt && !isTex) {
+        setError("Only PDF, TXT, or LaTeX (.tex) files are accepted");
         return;
       }
       if (file.size > 10 * 1024 * 1024) {
@@ -69,13 +73,16 @@ export default function ResumeUpload({
           ? { Authorization: `Bearer ${session.access_token}` }
           : {};
 
-        const res = await fetch("http://localhost:8000/upload", {
+        const res = await fetch(`${API_URL}/upload`, {
           method: "POST",
           headers,
           body: formData,
         });
 
-        if (!res.ok) throw new Error("Upload failed");
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.detail || `Upload failed (HTTP ${res.status})`);
+        }
 
         const data = await res.json();
         clearInterval(progressInterval);
@@ -83,13 +90,19 @@ export default function ResumeUpload({
 
         setTimeout(() => {
           setIsUploading(false);
+          setReplacing(false);
           onUploadComplete(data);
         }, 400);
-      } catch {
+      } catch (e) {
         clearInterval(progressInterval);
         setIsUploading(false);
+        setReplacing(false);
         setUploadProgress(0);
-        setError("Upload failed — is the backend running on :8000?");
+        setError(
+          e instanceof Error
+            ? e.message
+            : "Upload failed — restart the backend (Ctrl+C, then uvicorn again)"
+        );
       }
     },
     [onUploadComplete, supabase.auth]
@@ -103,16 +116,16 @@ export default function ResumeUpload({
   const onReplaceFileSelect = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
-      // Reset the input value so picking the same filename twice still fires.
       e.target.value = "";
       if (!file) {
         setReplacing(false);
         return;
       }
-      onReplace?.();
+      // Upload in-place — do NOT notify parent until success (avoids UI vanishing).
+      setReplacing(true);
       handleFile(file);
     },
-    [handleFile, onReplace]
+    [handleFile]
   );
 
   const onDragOver = useCallback((e: React.DragEvent) => {
@@ -183,7 +196,7 @@ export default function ResumeUpload({
         <input
           ref={replaceInputRef}
           type="file"
-          accept=".pdf,application/pdf"
+          accept=".pdf,.txt,.tex,application/pdf,text/plain"
           onChange={onReplaceFileSelect}
           className="hidden"
         />
@@ -247,7 +260,7 @@ export default function ResumeUpload({
                 Drop your resume here
               </p>
               <p className="mt-1 text-xs text-muted">
-                PDF only, up to 10MB
+                PDF, TXT, or LaTeX (.tex), up to 10MB
               </p>
               <button
                 type="button"
@@ -262,7 +275,7 @@ export default function ResumeUpload({
         <input
           ref={inputRef}
           type="file"
-          accept=".pdf,application/pdf"
+          accept=".pdf,.txt,.tex,application/pdf,text/plain"
           onChange={onFileSelect}
           className="hidden"
         />

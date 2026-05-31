@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import SkillPills from "./SkillPills";
 
@@ -18,17 +18,12 @@ export interface Job {
 interface JobCardProps {
   job: Job;
   index: number;
-  resumeId: string | null;
+  profileReady: boolean;
 }
 
-type ToastState = { type: "success" | "error"; message: string } | null;
-
-export default function JobCard({ job, index, resumeId }: JobCardProps) {
+export default function JobCard({ job, index, profileReady }: JobCardProps) {
   const router = useRouter();
   const [expanded, setExpanded] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [savedToRoadmap, setSavedToRoadmap] = useState(false);
-  const [toast, setToast] = useState<ToastState>(null);
 
   const pct = Math.round(job.match_score * 100);
 
@@ -43,40 +38,6 @@ export default function JobCard({ job, index, resumeId }: JobCardProps) {
     : pct >= 60 ? "from-accent-cyan to-accent-violet"
     : pct >= 40 ? "from-accent-amber to-accent-cyan"
     : "from-accent-coral to-accent-amber";
-
-  // Auto-dismiss toast after 3 s
-  useEffect(() => {
-    if (!toast) return;
-    const t = setTimeout(() => setToast(null), 3000);
-    return () => clearTimeout(t);
-  }, [toast]);
-
-  const handleSaveToRoadmap = async () => {
-    if (!resumeId || isSaving || savedToRoadmap) return;
-    setIsSaving(true);
-    try {
-      const res = await fetch("http://localhost:8000/roadmap/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          resume_id: resumeId,
-          job_title: job.title,
-          company: job.company,
-          job_description: job.description_snippet,
-          job_url: job.url,
-        }),
-      });
-      if (!res.ok) throw new Error("Server error");
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-      setSavedToRoadmap(true);
-      setToast({ type: "success", message: "Added to Roadmap" });
-    } catch {
-      setToast({ type: "error", message: "Failed to generate roadmap" });
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   return (
     <div
@@ -159,9 +120,9 @@ export default function JobCard({ job, index, resumeId }: JobCardProps) {
             href={job.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-accent-cyan hover:text-accent-violet transition-colors"
+            className="text-accent-cyan hover:text-accent-violet inline-flex items-center gap-1.5 text-xs font-medium transition-colors"
           >
-            View on Indeed
+            View job posting
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
               <polyline points="15 3 21 3 21 9" />
@@ -170,89 +131,28 @@ export default function JobCard({ job, index, resumeId }: JobCardProps) {
           </a>
 
           <div className="flex items-center gap-2">
-            {/* Auto Apply */}
             <button
               onClick={() => {
-                if (!resumeId) return;
-                localStorage.setItem("apply_job_data", JSON.stringify({
+                if (!profileReady) return;
+                localStorage.setItem("latex_job_data", JSON.stringify({
                   job_title: job.title,
                   company: job.company,
                   job_description: job.description_snippet,
                   job_url: job.url,
-                  resume_id: resumeId,
                 }));
-                const slug = job.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Math.random().toString(36).substring(2, 6);
-                router.push(`/apply/${slug}`);
+                router.push(`/resume/latex`);
               }}
-              disabled={!resumeId}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-accent-cyan to-accent-violet px-3 py-1.5 text-xs font-semibold text-background transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-accent-cyan/10"
+              disabled={!profileReady}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-accent-cyan to-accent-violet px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-accent-cyan/10"
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path d="M12 2L2 7l10 5 10-5-10-5z" />
                 <path d="M2 17l10 5 10-5" />
               </svg>
-              Auto Apply
-            </button>
-
-            {/* Save to Roadmap */}
-            <button
-              onClick={handleSaveToRoadmap}
-              disabled={!resumeId || isSaving || savedToRoadmap}
-              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-all
-                ${savedToRoadmap
-                  ? "border-accent-emerald/20 bg-accent-emerald/10 text-accent-emerald cursor-default"
-                  : isSaving
-                    ? "border-border bg-surface text-muted cursor-wait"
-                    : "border-accent-violet/20 bg-accent-violet/5 text-accent-violet hover:bg-accent-violet/10 disabled:opacity-40 disabled:cursor-not-allowed"
-                }`}
-            >
-              {isSaving ? (
-                <>
-                  <div className="h-3 w-3 rounded-full border border-muted/30 border-t-muted animate-spin" />
-                  Generating...
-                </>
-              ) : savedToRoadmap ? (
-                <>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <path d="M20 6L9 17l-5-5" />
-                  </svg>
-                  Saved
-                </>
-              ) : (
-                <>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-                  </svg>
-                  Save to Roadmap
-                </>
-              )}
+              Auto Create Resume
             </button>
           </div>
         </div>
-
-        {/* Toast */}
-        {toast && (
-          <div
-            className={`mt-3 flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium animate-slide-up
-              ${toast.type === "success"
-                ? "border border-accent-emerald/20 bg-accent-emerald/8 text-accent-emerald"
-                : "border border-accent-coral/20 bg-accent-coral/8 text-accent-coral"
-              }`}
-          >
-            {toast.type === "success" ? (
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M20 6L9 17l-5-5" />
-              </svg>
-            ) : (
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="15" y1="9" x2="9" y2="15" />
-                <line x1="9" y1="9" x2="15" y2="15" />
-              </svg>
-            )}
-            {toast.message}
-          </div>
-        )}
       </div>
     </div>
   );
