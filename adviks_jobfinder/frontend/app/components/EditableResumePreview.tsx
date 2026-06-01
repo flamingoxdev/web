@@ -238,7 +238,7 @@ export default function EditableResumePreview({
           if (parent) {
             const replacement = document.createElement(mode === "number" ? "ol" : "ul");
             replacement.innerHTML = list.innerHTML;
-            replacement.style.cssText = list.getAttribute("style") || list.style.cssText;
+            replacement.style.cssText = list.getAttribute("style") || (list as HTMLElement).style.cssText;
             parent.replaceChild(replacement, list);
           }
           return;
@@ -272,17 +272,27 @@ export default function EditableResumePreview({
     const container = rootRef.current;
     const inner = scaleRef.current;
     if (!container || !inner) return;
+    
+    // Reset any previous transforms
     inner.style.transform = "none";
-    inner.style.width = "";
-    const avail = container.clientHeight;
-    const needed = inner.scrollHeight;
-    if (needed > avail && avail > 0) {
-      const scale = avail / needed;
-      inner.style.transform = `scale(${scale})`;
-      inner.style.transformOrigin = "top left";
-      inner.style.width = `${100 / scale}%`;
-    }
-  }, []);
+    inner.style.width = "100%";
+    
+    const baseSize = isStartup ? 9.5 : 10;
+    container.style.fontSize = `${baseSize}pt`;
+    container.style.lineHeight = isStartup ? "1.32" : "1.45";
+    
+    requestAnimationFrame(() => {
+      let needed = inner.scrollHeight;
+      const verticalPadding = isStartup ? 96 : 106;
+      const avail = container.clientHeight - verticalPadding;
+      
+      if (needed > avail && avail > 0) {
+        const scale = avail / needed;
+        inner.style.transform = `scale(${scale})`;
+        inner.style.transformOrigin = "top center";
+      }
+    });
+  }, [isStartup]);
 
   useLayoutEffect(() => {
     fitOnePage();
@@ -319,12 +329,9 @@ export default function EditableResumePreview({
               ))}
             </select>
           </label>
-          <span className="mx-1 text-[#ccc]">|</span>
-          <button type="button" onMouseDown={(e) => { e.preventDefault(); applyList("bullet"); }} className="rounded px-2 py-1 text-xs hover:bg-gray-100" title="Bullet list">• List</button>
-          <button type="button" onMouseDown={(e) => { e.preventDefault(); applyList("number"); }} className="rounded px-2 py-1 text-xs hover:bg-gray-100" title="Numbered list">1. List</button>
-          <button type="button" onMouseDown={(e) => { e.preventDefault(); applyList("add-bullet"); }} className="rounded px-2 py-1 text-xs hover:bg-gray-100" title="Add bullet below">+ •</button>
-          <button type="button" onMouseDown={(e) => { e.preventDefault(); applyList("remove"); }} className="rounded px-2 py-1 text-xs hover:bg-gray-100" title="Remove list / outdent">− List</button>
-          <span className="ml-auto text-[10px] text-[#999]">Preview = PDF (one letter page)</span>
+          <span className="ml-auto text-[10px] text-muted font-medium">
+            💡 Use the AI Assistant on the left for writing edits & free responses · Preview = 1 Page PDF
+          </span>
         </div>
       )}
 

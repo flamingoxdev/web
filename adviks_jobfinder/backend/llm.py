@@ -48,6 +48,7 @@ def _get_nvidia_client():
 
 def _chat_nvidia(prompt: str, *, system: str | None, json_mode: bool, timeout: int) -> str:
     client = _get_nvidia_client()
+    load_dotenv(Path(__file__).resolve().parent.parent / ".env", override=True)
     model = os.getenv("NVIDIA_MODEL", NVIDIA_MODEL)
     max_tokens = int(os.getenv("LLM_MAX_TOKENS", "700"))
     temperature = float(os.getenv("LLM_TEMPERATURE", "0.1"))
@@ -122,6 +123,7 @@ def _chat_messages_nvidia(
     max_tokens: int | None,
 ) -> str:
     client = _get_nvidia_client()
+    load_dotenv(Path(__file__).resolve().parent.parent / ".env", override=True)
     model = os.getenv("NVIDIA_MODEL", NVIDIA_MODEL)
     token_limit = max_tokens or int(
         os.getenv("ASSISTANT_MAX_TOKENS" if not json_mode else "LLM_MAX_TOKENS", "1800" if not json_mode else "700")

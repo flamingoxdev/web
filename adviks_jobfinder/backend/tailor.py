@@ -518,12 +518,11 @@ def tailor_resume(
 # ── Refinement (user feedback) ─────────────────────────────────────────────
 
 _REFINE_SYSTEM = (
-    "You are a resume editor working on a single job-specific resume DRAFT only. "
-    "Never reference or modify the user's master profile — only edit the JSON draft "
-    "you receive. Apply ONLY the requested change. You may update contact fields "
-    "(phone, email, linkedin display) when the user explicitly asks. Do not invent "
-    "employers, schools, titles, dates, skills, projects, or metrics not already in "
-    "the draft. If the request cannot be applied safely, return the draft unchanged. "
+    "You are an expert resume editor working on a single job-specific resume DRAFT. "
+    "Your job is to apply ANY change the user requests to the JSON draft. "
+    "This includes shortening bullets, removing sections to save space, rewriting summaries, "
+    "or even adding custom skills/projects if explicitly requested. "
+    "Make sure the resume looks professional. "
     "Return the complete updated resume JSON in the same shape."
 )
 
@@ -622,12 +621,6 @@ def refine_resume(current_draft: dict, user_feedback: str, job_title: str, compa
             merged[key] = updated[key]
 
     updated = merged
-    if allow_skills and isinstance(updated.get("skills"), dict):
-        for bucket in ("technical", "soft"):
-            updated["skills"][bucket] = [
-                s for s in (updated["skills"].get(bucket) or [])
-                if isinstance(s, str) and s.lower() in allow_skills
-            ]
 
     # Preserve grounding metadata from the original draft so future refines
     # keep applying the same allow-list.
@@ -639,12 +632,11 @@ def refine_resume(current_draft: dict, user_feedback: str, job_title: str, compa
 
 _ASSISTANT_SYSTEM = (
     "You are Flamingo, an expert AI resume assistant in a job-specific resume editor.\n"
-    "The user has a ONE-PAGE resume DRAFT for a target role. Only edit this draft — "
-    "never reference or modify their master profile.\n\n"
+    "The user has a ONE-PAGE resume DRAFT for a target role. You can edit this draft "
+    "to accommodate ANY user request, including shortening it to fit on one page.\n\n"
     "You can:\n"
-    "1. EDIT the draft when asked (rewrite summary, bullets, contact display, tone)\n"
-    "2. ANSWER questions (interview prep, ATS tips, what to emphasize, how to phrase things, "
-    "whether a bullet is strong, career advice for this application)\n\n"
+    "1. EDIT the draft when asked (rewrite summary, shorten bullets, remove older jobs, add custom skills, change tone)\n"
+    "2. ANSWER questions (interview prep, ATS tips, what to emphasize)\n\n"
     "Respond with ONLY valid JSON:\n"
     "{\n"
     '  "action": "edit" | "answer",\n'
@@ -655,10 +647,9 @@ _ASSISTANT_SYSTEM = (
     "Rules:\n"
     "- action \"edit\" → include full updated resume in \"resume\" (same JSON shape)\n"
     "- action \"answer\" → resume must be null; give helpful advice using draft + target job\n"
-    "- Never invent employers, schools, dates, skills, projects, or metrics not in the draft\n"
-    "- You MAY change contact display (phone, email, linkedin) when explicitly requested\n"
-    "- If the user asks a pure question, use action \"answer\" even if you suggest improvements\n"
-    "- If they ask you to apply a change, use action \"edit\"\n"
+    "- You MUST follow the user's instructions to edit the resume. If they ask you to shorten it to save space, aggressively trim bullets, skills, or older roles.\n"
+    "- If they ask to add something specific, add it.\n"
+    "- If they ask a pure question, use action \"answer\".\n"
     "- Be conversational, smart, and reference their actual content"
 )
 
@@ -690,12 +681,6 @@ def _merge_refined_draft(current_draft: dict, updated: dict) -> dict:
     for key in ("work_experience", "projects", "education", "summary"):
         if updated.get(key) not in (None, "", []):
             merged[key] = updated[key]
-    if allow_skills and isinstance(merged.get("skills"), dict):
-        for bucket in ("technical", "soft"):
-            merged["skills"][bucket] = [
-                s for s in (merged["skills"].get(bucket) or [])
-                if isinstance(s, str) and s.lower() in allow_skills
-            ]
     merged["_grounding"] = current_draft.get("_grounding", merged.get("_grounding", {}))
     return merged
 

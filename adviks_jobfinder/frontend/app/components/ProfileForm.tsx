@@ -164,9 +164,9 @@ export default function ProfileForm({ mode, onComplete }: ProfileFormProps) {
           linkedin: personal.linkedin,
           github: personal.github,
           skills,
-          work_experience: sortByRecency(workExperience.filter((w) => w.title.trim() || w.company.trim())),
-          projects: sortByRecency(projects.filter((p) => p.name.trim())),
-          education: sortByRecency(education.filter((e) => e.degree.trim() || e.school.trim()), ["year"]),
+          work_experience: sortByRecency(workExperience.filter((w) => w.title.trim() || w.company.trim()) as any),
+          projects: sortByRecency(projects.filter((p) => p.name.trim()) as any),
+          education: sortByRecency(education.filter((e) => e.degree.trim() || e.school.trim()) as any, ["year"] as any),
         }),
       });
       if (res.status === 401) {
