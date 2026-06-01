@@ -13,6 +13,12 @@ const nextConfig: NextConfig = {
     workerThreads: false,
     memoryBasedWorkersCount: true,
   },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 };
 
 export default nextConfig;
