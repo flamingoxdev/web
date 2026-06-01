@@ -7,7 +7,7 @@ Provides endpoints for:
 - User profile management (editable fields)
 - AI resume tailoring & chat refinement
 - Roadmap generation
-- Playwright auto-fill submission
+- Resume builder application logic
 """
 
 import sys
