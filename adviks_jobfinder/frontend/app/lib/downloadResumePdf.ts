@@ -8,6 +8,7 @@ export async function downloadResumePdf(elementId: string, filename = "resume.pd
   await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
 
   const html2canvas = (await import("html2canvas")).default;
+  // @ts-ignore
   const { jsPDF } = await import("jspdf/dist/jspdf.es.min.js");
 
   const canvas = await html2canvas(el, {

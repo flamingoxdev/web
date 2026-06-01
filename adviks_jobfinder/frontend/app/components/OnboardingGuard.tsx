@@ -52,28 +52,9 @@ export default function OnboardingGuard({ children }: OnboardingGuardProps) {
       setStatus(onboarding);
 
       if (pathname === "/login" || pathname === "/") {
-        if (onboarding?.ready) router.replace("/dashboard");
-        else if (onboarding?.profile_complete) router.replace("/templates");
-        else router.replace("/onboarding/profile");
+        router.replace("/dashboard");
         setLoading(false);
         return;
-      }
-
-      if (onboarding && !PUBLIC.includes(pathname) && !ONBOARDING.includes(pathname)) {
-        if (!onboarding.profile_complete) {
-          router.replace("/onboarding/profile");
-          setLoading(false);
-          return;
-        }
-        if (!onboarding.has_template) {
-          router.replace("/templates");
-          setLoading(false);
-          return;
-        }
-      }
-
-      if (ONBOARDING.includes(pathname) && onboarding?.ready) {
-        router.replace("/dashboard");
       }
 
       setLoading(false);

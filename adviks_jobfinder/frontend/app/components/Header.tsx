@@ -61,12 +61,8 @@ export default function Header() {
                 Dashboard
               </Link>
               <Link
-                href="/profile"
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors
-                  ${pathname === "/profile"
-                    ? "bg-accent-cyan/10 text-accent-cyan"
-                    : "text-muted hover:text-foreground hover:bg-surface-raised"
-                  }`}
+                href="/dashboard?step=1"
+                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:text-foreground hover:bg-surface-raised"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -75,23 +71,15 @@ export default function Header() {
                 Profile
               </Link>
               <Link
-                href="/templates"
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors
-                  ${pathname === "/templates"
-                    ? "bg-accent-emerald/10 text-accent-emerald"
-                    : "text-muted hover:text-foreground hover:bg-surface-raised"
-                  }`}
+                href="/dashboard?step=4"
+                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:text-foreground hover:bg-surface-raised"
               >
                 <span>📄</span>
                 Templates
               </Link>
               <Link
-                href="/copilot"
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors
-                  ${pathname === "/copilot"
-                    ? "bg-accent-amber/10 text-accent-amber"
-                    : "text-muted hover:text-foreground hover:bg-surface-raised"
-                  }`}
+                href="/dashboard?step=4&chat=1"
+                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:text-foreground hover:bg-surface-raised"
               >
                 <span>🤖</span>
                 AI Assistant
