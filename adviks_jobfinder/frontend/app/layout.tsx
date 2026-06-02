@@ -24,8 +24,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Flamingo.ai — Find & Apply to Internships",
-  description: "Upload your profile and resume, get AI-ranked matches, and auto-fill applications.",
+  title: "Flamingo.ai — AI Resume Builder",
+  description: "Upload your profile and use the AI resume builder application to create tailored resumes.",
 };
 
 export default function RootLayout({

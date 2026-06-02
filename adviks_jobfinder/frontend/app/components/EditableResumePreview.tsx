@@ -330,7 +330,7 @@ export default function EditableResumePreview({
             </select>
           </label>
           <span className="ml-auto text-[10px] text-muted font-medium">
-            💡 Use the AI Assistant on the left for writing edits & free responses · Preview = 1 Page PDF
+            💡 Click any text to edit inline · Preview matches your PDF download
           </span>
         </div>
       )}

@@ -3,35 +3,41 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import SkillPills from "./SkillPills";
+import { applySingle, type DiscoverJob } from "../lib/api";
+import { createClient } from "../lib/supabase";
+import { getAccessToken } from "../lib/authToken";
 
-export interface Job {
-  title: string;
-  company: string;
-  location: string;
-  match_score: number;
-  matched_skills: string[];
-  missing_skills: string[];
-  url: string;
-  description_snippet: string;
-}
+export type Job = DiscoverJob;
 
 interface JobCardProps {
   job: Job;
   index: number;
   profileReady: boolean;
+  emailApplyEnabled?: boolean;
 }
 
-export default function JobCard({ job, index, profileReady }: JobCardProps) {
+export default function JobCard({ job, index, profileReady, emailApplyEnabled = false }: JobCardProps) {
   const router = useRouter();
+  const supabase = createClient();
   const [expanded, setExpanded] = useState(false);
+  const [applying, setApplying] = useState(false);
+  const [applyMsg, setApplyMsg] = useState<string | null>(null);
 
-  const pct = Math.round(job.match_score * 100);
+  const pct = Math.min(
+    100,
+    Math.round((job.ai_score ?? job.match_score * 10) * (job.ai_score ? 10 : 1))
+  );
 
   const scoreColor =
     pct >= 80 ? "text-accent-emerald"
     : pct >= 60 ? "text-accent-cyan"
     : pct >= 40 ? "text-accent-amber"
     : "text-accent-coral";
+
+  const canQuickApply = job.auto_apply_eligible ?? (
+    job.apply_method === "greenhouse" ||
+    (job.apply_method === "email" && emailApplyEnabled)
+  );
 
   const barColor =
     pct >= 80 ? "from-accent-emerald to-accent-cyan"
@@ -69,8 +75,17 @@ export default function JobCard({ job, index, profileReady }: JobCardProps) {
               {pct}
             </span>
             <span className="text-[10px] uppercase tracking-wider text-muted">match</span>
+            {job.apply_method && (
+              <span className="mt-1 rounded-full bg-surface-raised px-2 py-0.5 text-[9px] uppercase text-muted">
+                {job.apply_method}
+              </span>
+            )}
           </div>
         </div>
+
+        {job.ai_reason && (
+          <p className="mt-2 text-xs text-muted">{job.ai_reason}</p>
+        )}
 
         {/* Progress bar */}
         <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-surface-raised">
@@ -131,6 +146,28 @@ export default function JobCard({ job, index, profileReady }: JobCardProps) {
           </a>
 
           <div className="flex items-center gap-2">
+            {canQuickApply && (
+              <button
+                onClick={async () => {
+                  if (!profileReady || applying) return;
+                  setApplying(true);
+                  setApplyMsg(null);
+                  try {
+                    const token = await getAccessToken(supabase);
+                    const result = await applySingle(token, job);
+                    setApplyMsg(result.status === "applied" ? "Applied!" : result.error || result.status);
+                  } catch (e) {
+                    setApplyMsg(e instanceof Error ? e.message : "Apply failed");
+                  } finally {
+                    setApplying(false);
+                  }
+                }}
+                disabled={!profileReady || applying}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-accent-emerald/40 bg-accent-emerald/10 px-3 py-1.5 text-xs font-semibold text-accent-emerald disabled:opacity-40"
+              >
+                {applying ? "Applying…" : "Quick Apply"}
+              </button>
+            )}
             <button
               onClick={() => {
                 if (!profileReady) return;
@@ -151,6 +188,7 @@ export default function JobCard({ job, index, profileReady }: JobCardProps) {
               </svg>
               Auto Create Resume
             </button>
+            {applyMsg && <span className="text-[10px] text-muted">{applyMsg}</span>}
           </div>
         </div>
       </div>

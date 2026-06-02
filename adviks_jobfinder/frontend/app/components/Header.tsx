@@ -30,11 +30,26 @@ export default function Header() {
     router.push("/login");
   };
 
+  const navLink = (href: string, label: string, matchPath?: string) => {
+    const active = matchPath ? pathname === matchPath : pathname === href.split("?")[0];
+    return (
+      <Link
+        href={href}
+        className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors
+          ${active
+            ? "bg-accent-cyan/10 text-accent-cyan"
+            : "text-muted hover:text-foreground hover:bg-surface-raised"
+          }`}
+      >
+        {label}
+      </Link>
+    );
+  };
+
   return (
     <header className="relative w-full border-b border-border px-6 py-5">
       <div className="mx-auto flex max-w-7xl items-center justify-between">
         <div className="flex items-center gap-6">
-          {/* Logo + title */}
           <Link href="/dashboard" className="flex items-center gap-3">
             <div className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-accent-cyan to-accent-violet">
               <span className="text-lg">🦩</span>
@@ -47,43 +62,11 @@ export default function Header() {
             </span>
           </Link>
 
-          {/* Nav links — exactly 4 options as requested */}
           {user && (
             <nav className="flex items-center gap-1">
-              <Link
-                href="/dashboard"
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors
-                  ${pathname === "/dashboard"
-                    ? "bg-accent-cyan/10 text-accent-cyan"
-                    : "text-muted hover:text-foreground hover:bg-surface-raised"
-                  }`}
-              >
-                Dashboard
-              </Link>
-              <Link
-                href="/dashboard?step=1"
-                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:text-foreground hover:bg-surface-raised"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
-                Profile
-              </Link>
-              <Link
-                href="/dashboard?step=4"
-                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:text-foreground hover:bg-surface-raised"
-              >
-                <span>📄</span>
-                Templates
-              </Link>
-              <Link
-                href="/dashboard?step=4&chat=1"
-                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:text-foreground hover:bg-surface-raised"
-              >
-                <span>🤖</span>
-                AI Assistant
-              </Link>
+              {navLink("/jobs", "Jobs")}
+              {navLink("/dashboard", "Build your resume", "/dashboard")}
+              {navLink("/explore-templates", "Explore Templates", "/explore-templates")}
             </nav>
           )}
         </div>
