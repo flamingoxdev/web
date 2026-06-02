@@ -188,7 +188,7 @@ Jobs that can't be auto-applied (Indeed, LinkedIn, Workday) are surfaced in a ra
 - [x] AI job matching (NVIDIA Llama)
 - [ ] Greenhouse auto-apply
 - [ ] Email auto-apply (Resend)
-- [ ] AI cover letter generation
+- [x] AI cover letter generation
 - [x] Application tracking dashboard
 - [x] Manual apply queue with ranked listings
 - [ ] Workday ATS support
