@@ -8,7 +8,7 @@ Readme · MD
 Flamingo is an AI-powered job application platform that finds relevant jobs, scores them against your profile, writes tailored cover letters, and submits applications — all in a single click. No browser automation. No bots. No getting blocked.
  
 > Built on top of Flamingo's existing AI resume builder.
- 
+  
 ---
  
 ## ✨ Features
@@ -184,8 +184,8 @@ Jobs that can't be auto-applied (Indeed, LinkedIn, Workday) are surfaced in a ra
 ## 🗺️ Roadmap
  
 - [x] AI Resume Builder
-- [ ] Adzuna + RemoteOK job search
-- [ ] AI job matching (NVIDIA Llama)
+- [x] Adzuna + RemoteOK job search
+- [x] AI job matching (NVIDIA Llama)
 - [ ] Greenhouse auto-apply
 - [ ] Email auto-apply (Resend)
 - [ ] AI cover letter generation
