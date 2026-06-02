@@ -196,6 +196,36 @@ def save_application(user_id: str, polished_id: int, status: str = "submitted"):
     }).execute()
 
 
+def save_application_record(user_id: str, record: dict) -> dict | None:
+    """Save a full auto-apply tracking record."""
+    payload = {
+        "user_id": user_id,
+        "job_title": record.get("job_title"),
+        "company": record.get("company"),
+        "apply_url": record.get("apply_url"),
+        "apply_method": record.get("apply_method"),
+        "status": record.get("status", "submitted"),
+        "ai_match_score": record.get("ai_match_score"),
+        "ai_reason": record.get("ai_reason"),
+        "fail_reason": record.get("fail_reason"),
+        "cover_letter": record.get("cover_letter"),
+        "job_source": record.get("job_source"),
+        "polished_data_id": record.get("polished_data_id"),
+    }
+    payload = {k: v for k, v in payload.items() if v is not None}
+    try:
+        res = get_client().table("applications").insert(payload).execute()
+        return res.data[0] if res.data else None
+    except Exception as e:
+        # Fallback if extended columns not migrated yet
+        print(f"[db] save_application_record fallback: {e}")
+        get_client().table("applications").insert({
+            "user_id": user_id,
+            "status": record.get("status", "submitted"),
+        }).execute()
+        return None
+
+
 def get_applications(user_id: str) -> list[dict]:
     res = (get_client().table("applications")
            .select("*, polished_data(*)")

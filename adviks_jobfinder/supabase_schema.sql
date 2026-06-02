@@ -63,6 +63,15 @@ CREATE TABLE IF NOT EXISTS applications (
     id BIGSERIAL PRIMARY KEY,
     user_id TEXT NOT NULL,
     polished_data_id BIGINT REFERENCES polished_data(id) ON DELETE SET NULL,
+    job_title TEXT,
+    company TEXT,
+    apply_url TEXT,
+    apply_method TEXT,
+    ai_match_score REAL,
+    ai_reason TEXT,
+    fail_reason TEXT,
+    cover_letter TEXT,
+    job_source TEXT,
     status TEXT DEFAULT 'submitted',
     created_at TIMESTAMPTZ DEFAULT NOW()
 );

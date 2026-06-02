@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useCallback, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { createClient } from "../lib/supabase";
@@ -12,10 +13,10 @@ import { downloadResumePdf } from "../lib/downloadResumePdf";
 import { themeForTemplate, TEMPLATE_THEMES } from "../lib/templates";
 
 const STEPS = [
-  { id: 1, name: "Profile Reference", desc: "Build master resume profile", icon: "👤" },
+  { id: 1, name: "Profile", desc: "Your info & resume upload", icon: "👤" },
   { id: 2, name: "Job Details", desc: "Target job requirements", icon: "💼" },
   { id: 3, name: "AI Generation", desc: "Tailoring to fit exactly 1 page", icon: "✨" },
-  { id: 4, name: "Export & Polish", desc: "Templates, edits, & assistant", icon: "📄" },
+  { id: 4, name: "Edit & choose template", desc: "Edit draft & pick layout", icon: "📄" },
 ];
 
 function DashboardContent() {
@@ -41,18 +42,7 @@ function DashboardContent() {
   // Step 4 Workspace State
   const [generatedResume, setGeneratedResume] = useState<ResumeData | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState("jakes_resume");
-  const [activeTab, setActiveTab] = useState<"templates" | "chat">("templates");
   const [resumeExpanded, setResumeExpanded] = useState(false);
-
-  // AI Assistant Chat State
-  const [chatHistory, setChatHistory] = useState<Array<{ role: "user" | "assistant"; content: string }>>([
-    {
-      role: "assistant",
-      content: "Hello! I am Flamingo, your personal AI resume assistant. I've tailored your resume to fit perfectly on exactly one page. Would you like me to shorten any bullets, emphasize certain skills, or change the tone?",
-    },
-  ]);
-  const [chatMessage, setChatMessage] = useState("");
-  const [chatLoading, setChatLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Sync steps from URL query parameter (?step=X)
@@ -68,10 +58,6 @@ function DashboardContent() {
           setActiveStep(stepNum);
         }
       }
-    }
-    const openChat = searchParams.get("chat");
-    if (openChat === "1") {
-      setActiveTab("chat");
     }
   }, [searchParams, generatedResume]);
 
@@ -169,7 +155,6 @@ function DashboardContent() {
       setTimeout(() => {
         setGeneratedResume(resData.tailored);
         setActiveStep(4);
-        setActiveTab("templates");
       }, 1000);
     } catch (err: any) {
       clearInterval(logInterval);
@@ -179,62 +164,6 @@ function DashboardContent() {
       setTimeout(() => {
         setActiveStep(2);
       }, 3000);
-    }
-  };
-
-  // AI Assistant message handler
-  const handleSendMessage = async (customMsg?: string) => {
-    const textToSend = customMsg || chatMessage;
-    if (!textToSend.trim() || !generatedResume) return;
-
-    if (!customMsg) setChatMessage("");
-
-    const newHistory: Array<{ role: "user" | "assistant"; content: string }> = [
-      ...chatHistory,
-      { role: "user" as const, content: textToSend },
-    ];
-    setChatHistory(newHistory);
-    setChatLoading(true);
-
-    try {
-      const token = await getAccessToken(supabase);
-      if (!token) throw new Error("Auth token invalid");
-
-      const response = await fetch(`${API_URL}/tailor/assistant`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          current_draft: generatedResume,
-          message: textToSend,
-          job_title: jobTitle,
-          company: company,
-          history: chatHistory.slice(-6),
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Assistant response failed");
-      }
-
-      const resData = await response.json();
-      setChatHistory((prev) => [
-        ...prev,
-        { role: "assistant", content: resData.reply || "I updated your draft successfully." },
-      ]);
-
-      if (resData.tailored) {
-        setGeneratedResume(resData.tailored);
-      }
-    } catch (err: any) {
-      setChatHistory((prev) => [
-        ...prev,
-        { role: "assistant", content: "Apologies, I encountered an issue modifying your resume. Please try again." },
-      ]);
-    } finally {
-      setChatLoading(false);
     }
   };
 
@@ -345,10 +274,10 @@ function DashboardContent() {
               <div className="border-b border-border bg-surface-raised px-6 py-4 flex items-center justify-between">
                 <div>
                   <h2 className="font-[family-name:var(--font-syne)] text-xl font-bold tracking-tight text-foreground">
-                    Master Reference Profile
+                    Profile
                   </h2>
                   <p className="text-xs text-muted">
-                    This data serves as the single source of truth. The AI never invents details.
+                    Upload your resume or fill in your details — this is step 1 of the resume builder.
                   </p>
                 </div>
                 {profileReady && (
@@ -491,132 +420,47 @@ function DashboardContent() {
             {!resumeExpanded && (
             <div className="lg:col-span-5 flex flex-col gap-6">
               <div className="glass-card overflow-hidden">
-                {/* Tabs */}
-                <div className="flex border-b border-border bg-surface-raised">
-                  <button
-                    onClick={() => setActiveTab("templates")}
-                    className={`flex-1 py-3 text-sm font-semibold border-b-2 transition-all flex items-center justify-center gap-1.5
-                      ${activeTab === "templates"
-                        ? "border-accent-cyan text-accent-cyan bg-accent-cyan/5"
-                        : "border-transparent text-muted hover:text-foreground"
-                      }`}
-                  >
-                    🎨 Layout Templates
-                  </button>
-                  <button
-                    onClick={() => setActiveTab("chat")}
-                    className={`flex-1 py-3 text-sm font-semibold border-b-2 transition-all flex items-center justify-center gap-1.5
-                      ${activeTab === "chat"
-                        ? "border-accent-cyan text-accent-cyan bg-accent-cyan/5"
-                        : "border-transparent text-muted hover:text-foreground"
-                      }`}
-                  >
-                    🤖 Copilot Chat
-                  </button>
+                <div className="border-b border-border bg-surface-raised px-6 py-4">
+                  <h3 className="font-[family-name:var(--font-syne)] text-sm font-bold">Choose a template</h3>
+                  <p className="text-xs text-muted mt-0.5">
+                    Pick a layout or{" "}
+                    <Link href="/explore-templates" className="text-accent-cyan hover:underline">
+                      explore the gallery
+                    </Link>
+                  </p>
                 </div>
-
                 <div className="p-6">
-                  {/* Templates Selector Content */}
-                  {activeTab === "templates" && (
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-2 gap-3">
-                        {Object.entries(TEMPLATE_THEMES).map(([id, tpl]) => {
-                          const isSelected = selectedTemplate === id;
-                          return (
-                            <button
-                              key={id}
-                              onClick={() => setSelectedTemplate(id)}
-                              className={`glass-card p-3 text-left transition-all hover:scale-[1.02] border flex flex-col gap-1.5
-                                ${isSelected
-                                  ? "border-accent-cyan bg-accent-cyan/5 shadow-[0_0_12px_rgba(0,184,148,0.15)]"
-                                  : "border-border hover:border-muted-foreground"
-                                }`}
-                            >
-                              <div className="flex items-center gap-2">
-                                <span
-                                  className="h-3 w-3 rounded-full border border-border"
-                                  style={{ backgroundColor: tpl.accent }}
-                                />
-                                <span className="text-xs font-bold truncate">
-                                  {id.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
-                                </span>
-                              </div>
-                              <p className="text-[10px] text-muted truncate">
-                                Style: {tpl.layout} · Font: {tpl.font.split(",")[0].replace(/'/g, "")}
-                              </p>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* AI Copilot Chat Content */}
-                  {activeTab === "chat" && (
-                    <div className="space-y-4">
-                      {/* Scrolling conversation messages */}
-                      <div className="h-[280px] overflow-y-auto border border-border rounded-xl p-4 bg-surface/30 space-y-3 scrollbar-thin scrollbar-thumb-surface flex flex-col">
-                        {chatHistory.map((msg, i) => (
-                          <div
-                            key={i}
-                            className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-xs line-clamp-none
-                              ${msg.role === "user"
-                                ? "bg-accent-violet text-white self-end rounded-tr-none"
-                                : "bg-surface border border-border text-foreground self-start rounded-tl-none"
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      {Object.entries(TEMPLATE_THEMES).map(([id, tpl]) => {
+                        const isSelected = selectedTemplate === id;
+                        return (
+                          <button
+                            key={id}
+                            onClick={() => setSelectedTemplate(id)}
+                            className={`glass-card p-3 text-left transition-all hover:scale-[1.02] border flex flex-col gap-1.5
+                              ${isSelected
+                                ? "border-accent-cyan bg-accent-cyan/5 shadow-[0_0_12px_rgba(0,184,148,0.15)]"
+                                : "border-border hover:border-muted-foreground"
                               }`}
                           >
-                            {msg.content}
-                          </div>
-                        ))}
-                        {chatLoading && (
-                          <div className="bg-surface border border-border text-foreground self-start rounded-2xl rounded-tl-none px-4 py-2.5 text-xs flex items-center gap-2">
-                            <span className="h-1.5 w-1.5 rounded-full bg-accent-cyan animate-bounce" />
-                            <span className="h-1.5 w-1.5 rounded-full bg-accent-cyan animate-bounce [animation-delay:0.2s]" />
-                            <span className="h-1.5 w-1.5 rounded-full bg-accent-cyan animate-bounce [animation-delay:0.4s]" />
-                            <span className="text-muted">Flamingo is writing...</span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Chip shortcuts */}
-                      <div className="flex flex-wrap gap-1.5">
-                        {[
-                          "Shorten resume to fit 1 page",
-                          "Emphasize technical skills",
-                          "Rephrase bullet points to be stronger",
-                        ].map((chip) => (
-                          <button
-                            key={chip}
-                            disabled={chatLoading}
-                            onClick={() => handleSendMessage(chip)}
-                            className="text-[10px] bg-surface-raised border border-border rounded-full px-2.5 py-1 text-muted hover:text-foreground hover:border-muted-foreground transition-all"
-                          >
-                            ⚡ {chip}
+                            <div className="flex items-center gap-2">
+                              <span
+                                className="h-3 w-3 rounded-full border border-border"
+                                style={{ backgroundColor: tpl.accent }}
+                              />
+                              <span className="text-xs font-bold truncate">
+                                {id.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-muted truncate">
+                              Style: {tpl.layout} · Font: {tpl.font.split(",")[0].replace(/'/g, "")}
+                            </p>
                           </button>
-                        ))}
-                      </div>
-
-                      {/* Message input */}
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          disabled={chatLoading}
-                          value={chatMessage}
-                          onChange={(e) => setChatMessage(e.target.value)}
-                          onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-                          placeholder="Ask Flamingo to refine this draft..."
-                          className="flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-xs outline-none focus:border-accent-cyan/50"
-                        />
-                        <button
-                          disabled={chatLoading || !chatMessage.trim()}
-                          onClick={() => handleSendMessage()}
-                          className="rounded-lg bg-accent-cyan px-4 py-2 text-xs font-bold text-white hover:opacity-90 disabled:opacity-50"
-                        >
-                          Send
-                        </button>
-                      </div>
+                        );
+                      })}
                     </div>
-                  )}
+                  </div>
                 </div>
               </div>
 
@@ -683,12 +527,6 @@ function DashboardContent() {
                   >
                     🖨 Print
                   </button>
-                  <button
-                    onClick={() => { setResumeExpanded(false); setActiveTab('chat'); }}
-                    className="rounded-xl border border-accent-violet/30 bg-accent-violet/10 px-6 py-3 text-xs font-bold text-accent-violet hover:bg-accent-violet/20 transition-all flex items-center justify-center gap-2"
-                  >
-                    🤖 AI Assistant
-                  </button>
                 </div>
               )}
 
@@ -726,7 +564,7 @@ export default function DashboardPage() {
           <div className="flex flex-col items-center gap-4">
             <div className="h-12 w-12 rounded-full border-4 border-accent-cyan/20 border-t-accent-cyan animate-spin" />
             <p className="font-[family-name:var(--font-jetbrains-mono)] text-sm text-muted">
-              Loading Flamingo dashboard...
+              Loading Build your resume...
             </p>
           </div>
         </div>

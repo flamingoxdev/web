@@ -17,6 +17,7 @@ import {
   isBlankProject,
   isBlankEducation,
 } from "../lib/profileTypes";
+import ResumeUpload from "./ResumeUpload";
 
 const emptyWork: WorkExperience = {
   title: "", company: "", location: "", start_date: "", end_date: "", duration: "", description: "",
@@ -49,6 +50,8 @@ export default function ProfileForm({ mode, onComplete }: ProfileFormProps) {
   const [projects, setProjects] = useState<Project[]>([{ ...emptyProject }]);
   const [education, setEducation] = useState<Education[]>([{ ...emptyEdu }]);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [hasResume, setHasResume] = useState(false);
+  const [extractedSkills, setExtractedSkills] = useState<string[]>([]);
 
   const getToken = useCallback(async () => {
     return getAccessToken(supabase);
@@ -96,6 +99,14 @@ export default function ProfileForm({ mode, onComplete }: ProfileFormProps) {
         if (Array.isArray(p.work_experience) && p.work_experience.length) setWorkExperience(p.work_experience);
         if (Array.isArray(p.projects) && p.projects.length) setProjects(p.projects);
         if (Array.isArray(p.education) && p.education.length) setEducation(p.education);
+
+        const statusRes = await fetch(`${API_URL}/onboarding/status`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (statusRes.ok) {
+          const st = await statusRes.json();
+          if (active) setHasResume(Boolean(st.has_resume));
+        }
       } catch (e) {
         if (!active) return;
         console.error("Profile load error:", e);
@@ -247,9 +258,80 @@ export default function ProfileForm({ mode, onComplete }: ProfileFormProps) {
     <div className="space-y-6">
       {mode === "onboarding" && (
         <div className="rounded-xl border border-accent-cyan/20 bg-accent-cyan/5 px-4 py-3 text-sm text-foreground">
-          <strong>Step 1:</strong> Build your profile in detail. I&apos;ll use this to generate a one-page resume for every job you apply to — picking the most relevant projects and tailoring bullets.
+          <strong>Step 1 — Profile:</strong> Upload your resume PDF or fill in your details below. Flamingo uses this for tailoring and auto-apply.
         </div>
       )}
+
+      <section className="glass-card p-6">
+        <div className="mb-4 flex items-start justify-between gap-4">
+          <div>
+            <h2 className="font-[family-name:var(--font-syne)] text-lg font-semibold">Upload Resume</h2>
+            <p className="mt-1 text-xs text-muted">
+              PDF recommended for auto-apply. We parse skills and pre-fill your profile.
+            </p>
+          </div>
+          {hasResume && (
+            <span className="shrink-0 rounded-full border border-accent-emerald/20 bg-accent-emerald/10 px-3 py-1 text-[10px] font-semibold text-accent-emerald">
+              PDF ready
+            </span>
+          )}
+        </div>
+        <ResumeUpload
+          isUploaded={hasResume}
+          onReplace={() => setHasResume(false)}
+          onUploadComplete={async (data) => {
+            setHasResume(true);
+            if (data.extracted_skills?.length) {
+              setExtractedSkills(data.extracted_skills);
+              setSkills((prev) => {
+                const merged = [...prev];
+                for (const s of data.extracted_skills) {
+                  if (!merged.includes(s)) merged.push(s);
+                }
+                return merged;
+              });
+            }
+            setToast({
+              type: "success",
+              message: "Resume uploaded — review and save your profile below",
+            });
+            const token = await getToken();
+            if (token) {
+              const res = await fetch(`${API_URL}/profile`, {
+                headers: { Authorization: `Bearer ${token}` },
+              });
+              if (res.ok) {
+                const profileData = await res.json();
+                const p = profileData.profile;
+                const pi = typeof p.personal_info === "object" ? p.personal_info : {};
+                setPersonal((prev) => ({
+                  ...prev,
+                  ...pi,
+                  full_name: p.full_name || pi.full_name || prev.full_name,
+                  email: p.email || pi.email || prev.email,
+                  phone: p.phone || pi.phone || prev.phone,
+                  location: p.location || pi.location || prev.location,
+                  linkedin: p.linkedin || pi.linkedin || prev.linkedin,
+                  github: p.github || pi.github || prev.github,
+                }));
+                if (Array.isArray(p.skills) && p.skills.length) setSkills(p.skills);
+                if (Array.isArray(p.work_experience) && p.work_experience.length) setWorkExperience(p.work_experience);
+                if (Array.isArray(p.projects) && p.projects.length) setProjects(p.projects);
+                if (Array.isArray(p.education) && p.education.length) setEducation(p.education);
+              }
+            }
+          }}
+        />
+        {extractedSkills.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-1.5">
+            {extractedSkills.slice(0, 12).map((s) => (
+              <span key={s} className="rounded-full bg-accent-violet/10 px-2 py-0.5 text-[10px] text-accent-violet">
+                {s}
+              </span>
+            ))}
+          </div>
+        )}
+      </section>
 
       <section className="glass-card p-6">
         <h2 className="mb-4 font-[family-name:var(--font-syne)] text-lg font-semibold">Basic Information</h2>

@@ -40,6 +40,7 @@ from db import (
     save_roadmap, get_roadmaps, delete_roadmap,
     save_polished_data, get_polished_data,
     save_application, get_applications,
+    save_application_record,
     save_build_session, get_build_session, delete_build_session,
     save_application_package, get_application_packages, get_application_package,
 )
@@ -644,6 +645,94 @@ def save_approved_resume(body: dict, request: Request):
     return {"status": "saved", "message": "Resume approved and saved"}
 
 
+@app.get("/jobs/discover")
+async def discover_jobs_endpoint(request: Request, q: str = "", location: str = "USA", remote: str = "false", country: str = "us"):
+    """Search Adzuna + RemoteOK and AI-rank results."""
+    user_id = require_auth(request)
+    if not q.strip():
+        raise HTTPException(status_code=400, detail="query parameter q is required")
+
+    from apply.pipeline import search_and_rank_jobs
+    from apply.email import get_apply_capabilities
+
+    try:
+        jobs = await search_and_rank_jobs(
+            user_id=user_id,
+            query=q.strip(),
+            location=location,
+            remote=remote.lower() == "true",
+            country=country,
+        )
+        return {"jobs": jobs, "total": len(jobs), "apply_capabilities": get_apply_capabilities()}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/apply/auto")
+async def auto_apply_jobs(body: dict, request: Request):
+    """Auto-apply to top AI-ranked jobs (Greenhouse + email)."""
+    user_id = require_auth(request)
+    query = (body.get("query") or body.get("q") or "").strip()
+    if not query:
+        raise HTTPException(status_code=400, detail="query is required")
+
+    from apply.pipeline import run_auto_apply
+
+    try:
+        result = await run_auto_apply(
+            user_id=user_id,
+            query=query,
+            location=body.get("location", "USA"),
+            remote=bool(body.get("remote", False)),
+            target_count=min(int(body.get("target_count", 20)), 25),
+            min_score=int(body.get("min_score", 6)),
+            resume_id=body.get("resume_id"),
+        )
+        return result
+    except RuntimeError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/apply/single")
+async def apply_single_job(body: dict, request: Request):
+    """Apply to one job by payload."""
+    user_id = require_auth(request)
+    job = body.get("job")
+    if not job:
+        raise HTTPException(status_code=400, detail="job object is required")
+
+    from apply.pipeline import build_apply_profile, apply_to_job
+    from resume.get_pdf import get_resume_pdf_base64
+
+    profile_row = get_profile(user_id)
+    if not profile_row:
+        raise HTTPException(status_code=400, detail="Complete your profile first")
+
+    user_profile = build_apply_profile(profile_row, target_role=job.get("title", ""))
+    resume_base64, _ = await get_resume_pdf_base64(user_id, body.get("resume_id"))
+
+    try:
+        outcome = await apply_to_job(
+            user_id=user_id,
+            job=job,
+            user_profile=user_profile,
+            resume_base64=resume_base64,
+            profile_row=profile_row,
+            min_score=0,
+        )
+        return outcome
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/applications")
+def list_applications(request: Request):
+    """List user's application history."""
+    user_id = require_auth(request)
+    apps = get_applications(user_id)
+    return {"applications": apps}
 
 
 @app.get("/polished")
