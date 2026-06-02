@@ -189,8 +189,8 @@ Jobs that can't be auto-applied (Indeed, LinkedIn, Workday) are surfaced in a ra
 - [ ] Greenhouse auto-apply
 - [ ] Email auto-apply (Resend)
 - [ ] AI cover letter generation
-- [ ] Application tracking dashboard
-- [ ] Manual apply queue with ranked listings
+- [x] Application tracking dashboard
+- [x] Manual apply queue with ranked listings
 - [ ] Workday ATS support
 - [ ] Lever ATS support
 - [ ] Job alerts + scheduled auto-apply
