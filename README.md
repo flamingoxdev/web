@@ -178,7 +178,7 @@ Job boards (LinkedIn, Indeed, Greenhouse) actively block headless browsers using
 | Manual Queue | ~50% | AI-ranked list with direct links |
  
 Jobs that can't be auto-applied (Indeed, LinkedIn, Workday) are surfaced in a ranked **Manual Queue** — so even those are easier and faster.
- 
+     
 ---
  
 ## 🗺️ Roadmap
